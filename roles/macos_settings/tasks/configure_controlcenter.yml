@@ -1,0 +1,10 @@
+---
+- name: Control Center - Configure defaults
+  community.general.osx_defaults:
+    domain: com.apple.controlcenter
+    key: "{{ item.key }}"
+    type: "{{ item.type }}"
+    value: "{{ item.value }}"
+    state: present
+  with_items: "{{ controlcenter.defaults }}"
+  tags: controlcenter, defaults

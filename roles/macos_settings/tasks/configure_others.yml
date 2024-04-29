@@ -1,0 +1,15 @@
+---
+- name: Others - Configure defaults
+  community.general.osx_defaults:
+    host: "{{ item.host | default(omit) }}"
+    domain: "{{ item.domain }}"
+    key: "{{ item.key }}"
+    type: "{{ item.type }}"
+    value: "{{ item.value }}"
+    state: present
+  with_items: "{{ others.defaults }}"
+  notify:
+    - Kill SystemUIServer
+    - Kill Dock
+    - Kill Finder
+  tags: others, defaults

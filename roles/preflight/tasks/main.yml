@@ -1,0 +1,5 @@
+---
+- name: Close any open System Settings panes
+  ansible.builtin.command: osascript -e 'tell application "System Settings" to quit'
+  changed_when: false
+  tags: preflight

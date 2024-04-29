@@ -1,0 +1,10 @@
+---
+- name: Spotlight - Configure defaults
+  community.general.osx_defaults:
+    domain: com.apple.spotlight
+    key: "{{ item.key }}"
+    type: "{{ item.type }}"
+    value: "{{ item.value }}"
+    state: present
+  with_items: "{{ spotlight.defaults }}"
+  tags: spotlight, defaults

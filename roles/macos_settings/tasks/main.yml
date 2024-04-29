@@ -1,0 +1,35 @@
+---
+- name: Setup Settings
+  ansible.builtin.include_tasks: configure_settings.yml
+  tags: settings
+
+- name: Setup Control Center
+  ansible.builtin.include_tasks: configure_controlcenter.yml
+  tags: controlcenter
+
+- name: Setup Spotlight
+  ansible.builtin.include_tasks: configure_spotlight.yml
+  tags: spotlight
+
+- name: Setup Dock
+  ansible.builtin.include_tasks: configure_dock.yml
+  tags: dock
+
+- name: Setup Finder
+  ansible.builtin.include_tasks: configure_finder.yml
+  tags: finder
+
+- name: Setup TextEdit
+  ansible.builtin.include_tasks: configure_textedit.yml
+  tags: textedit
+
+- name: Setup Network
+  ansible.builtin.include_tasks: configure_network.yml
+  tags: network
+
+- name: Setup others
+  ansible.builtin.include_tasks: configure_others.yml
+  tags: others
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers

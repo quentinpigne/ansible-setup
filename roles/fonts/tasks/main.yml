@@ -1,0 +1,8 @@
+---
+- name: Copy fonts
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/Users/{{ username }}/Library/Fonts/{{ item }}"
+    mode: "0700"
+  with_items: "{{ fonts_to_install }}"
+  tags: fonts

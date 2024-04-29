@@ -1,0 +1,36 @@
+---
+- name: Check for .oh-my-zsh exists
+  ansible.builtin.stat:
+    path: /Users/{{ username }}/.oh-my-zsh
+  register: ohmyzsh_folder
+  tags: zsh
+
+- name: Check for .dotfiles exists
+  ansible.builtin.stat:
+    path: /Users/{{ username }}/.dotfiles
+  register: dotfiles_folder
+  tags: dotfiles
+
+- name: Install Oh My Zsh
+  ansible.builtin.shell: |
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  when: not ohmyzsh_folder.stat.exists
+  changed_when: true
+  tags: zsh
+
+- name: Install dotfiles
+  ansible.builtin.git:
+    repo: "git@github.com:quentinpigne/dotfiles.git /Users/{{ username }}/.dotfiles"
+    dest: "/Users/{{ username }}/.dotfiles"
+    version: "macos"
+    bare: true
+  when: not dotfiles_folder.stat.exists
+  changed_when: true
+  tags: dotfiles
+
+- name: Reset dotfiles
+  ansible.builtin.shell: |
+    git --git-dir=/Users/{{ username }}/.dotfiles/ --work-tree=/Users/{{ username }} reset --hard
+  when: not dotfiles_folder.stat.exists
+  changed_when: true
+  tags: dotfiles

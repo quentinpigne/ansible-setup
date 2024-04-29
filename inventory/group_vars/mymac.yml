@@ -1,0 +1,199 @@
+##
+# Commons
+##
+username: quentin
+group: staff
+hostname: MacBook-Quentin
+
+##
+# Git
+##
+git:
+  username: Quentin Pigné
+  email: quentin.pigne@gmail.com
+
+##
+# Homebrew
+##
+homebrew:
+  taps: []
+
+  formulae:
+    - ansible
+    - gcc
+    - git
+    - git-lfs
+    - go
+    - node
+    - openjdk
+    - openjdk@17
+    - python@3.12
+    - rust
+
+  casks:
+    - bitwarden
+    - brave-browser
+    - discord
+    - figma
+    - iterm2
+    - microsoft-office
+    - microsoft-teams
+    - notion
+    - obs
+    - openemu
+    - spotify
+    - steam
+    - visual-studio-code
+
+##
+# AppStore
+##
+appstore:
+  applications: []
+
+##
+# NPM modules
+##
+npm:
+  packages:
+    - pnpm
+    - yarn
+
+##
+# Global settings
+##
+settings:
+  defaults:
+    # Disable automatic writing modes
+    - { name: Disable automatic capitalization, key: NSAutomaticCapitalizationEnabled, type: bool, value: false }
+    - { name: Disable smart dashes, key: NSAutomaticDashSubstitutionEnabled, type: bool, value: false }
+    - { name: Disable automatic period substitutions, key: NSAutomaticPeriodSubstitutionEnabled, type: bool, value: false }
+    - { name: Disable smart quotes, key: NSAutomaticQuoteSubstitutionEnabled, type: bool, value: false }
+    - { name: Disable auto-correct, key: NSAutomaticSpellingCorrectionEnabled, type: bool, value: false }
+    # System behaviors
+    # Possible values: `WhenScrolling`, `Automatic` and `Always`
+    - { name: Set automatic scrollbars, key: AppleShowScrollBars, type: string, value: WhenScrolling }
+
+  # Disable startup chime
+  disable_sound_effects_on_boot: false
+
+##
+# Control Center settings
+##
+controlcenter:
+  defaults:
+    - { name: Don't show now playing, key: "NSStatusItem Visible NowPlaying", type: bool, value: false }
+
+##
+# Spotlight settings
+##
+spotlight:
+  defaults:
+    - { name: Don't show icon in menu, key: "NSStatusItem Visible Item-0", type: bool, value: false }
+
+##
+# Dock settings
+##
+dock:
+  defaults:
+    - { name: Don't automatically rearrange Spaces based on most recent use, key: mru-spaces, type: bool, value: false }
+    - { name: Don't show recent applications in Dock, key: show-recents, type: bool, value: false }
+    - { name: Set size of icons, key: tilesize, type: integer, value: 32 }
+    - { name: Hot corners - Top left corner 1/2, key: wvous-tl-corner, type: int, value: 0 }
+    - { name: Hot corners - Top left corner 2/2, key: wvous-tl-modifier, type: int, value: 0 }
+    - { name: Hot corners - Top right corner 1/2, key: wvous-tr-corner, type: int, value: 0 }
+    - { name: Hot corners - Top right corner 2/2, key: wvous-tr-modifier, type: int, value: 0 }
+    - { name: Hot corners - Bottom left corner 1/2, key: wvous-bl-corner, type: int, value: 0 }
+    - { name: Hot corners - Bottom left corner 2/2, key: wvous-bl-modifier, type: int, value: 0 }
+    - { name: Hot corners - Bottom right corner 1/2, key: wvous-br-corner, type: int, value: 0 }
+    - { name: Hot corners - Bottom right corner 2/2, key: wvous-br-modifier, type: int, value: 0 }
+
+  # Set applications in Dock
+  display_applications:
+    - "\"/Applications/Brave Browser.app\""
+    - "\"/Applications/Microsoft Outlook.app\""
+    - "\"/Applications/Microsoft Teams (work or school).app\""
+    - /Applications/Discord.app
+    - "\"/Applications/Microsoft Word.app\""
+    - "\"/Applications/Microsoft Excel.app\""
+    - "\"/Applications/Microsoft PowerPoint.app\""
+    - "\"/Applications/Microsoft OneNote.app\""
+    - /Applications/Notion.app
+    - /Applications/Figma.app
+    - /Applications/Spotify.app
+    - /Applications/OpenEmu.app
+    - /Applications/Steam.app
+    - "\"/Applications/Visual Studio Code.app\""
+    - /Applications/iTerm.app
+    - "\"/System/Applications/System Settings.app\""
+
+  # Set folders in Dock
+  display_folders:
+    - /Users/quentin/Library/CloudStorage/OneDrive-Personnel/
+    - /Users/quentin/Downloads/
+    - /Applications/
+
+  # Reset Launchpad
+  reset_launchpad: false
+
+##
+# Finder settings
+##
+finder:
+  defaults:
+    - { name: Keep folders on top when sorting by name, key: _FXSortFoldersFirst, type: bool, value: true }
+    - { name: Define new window location, key: NewWindowTarget, type: string, value: PfHm }
+    - { name: Define path for new window, key: NewWindowTargetPath, type: string, value: "file:///Users/{{ username }}/" }
+
+  # Unhide folders
+  show_folders:
+    - ~/Library
+
+  # Remove default tags
+  remove_tags: false
+
+##
+# iTerm2 settings
+##
+iterm2:
+  defaults:
+    - { name: Don't dimm inactive split panes, key: DimInactiveSplitPanes, type: bool, value: false }
+
+
+##
+# Textedit settings
+##
+textedit:
+  defaults:
+    - { name: Use plain text mode for new documents, key: RichText, type: int, value: 0 }
+
+##
+# Network
+##
+network_configuration:
+  - interface_name: Wi-Fi
+    dns_servers:
+      - 1.1.1.2
+      - 1.0.0.2
+      - 2606:4700:4700::1112
+      - 2606:4700:4700::1001
+
+##
+# Others
+##
+others:
+  defaults:
+    # Disable show desktop on click
+    - { name: Disable show desktop on click, domain: com.apple.WindowManager, key: EnableStandardClickToShowDesktop, type: bool, value: false }
+    # Avoid creating .DS_Store
+    - { name: Avoid creating .DS_Store files on network, domain: com.apple.desktopservices, key: DSDontWriteNetworkStores, type: bool, value: true }
+    - { name: Avoid creating .DS_Store files on USB volumes, domain: com.apple.desktopservices, key: DSDontWriteUSBStores, type: bool, value: true }
+    # Trackpad: enable tap to click for this user and for the login screen
+    - { name: Enable tap to click for this user and for the login screen 1/4, domain: com.apple.driver.AppleBluetoothMultitouch.trackpad, key: Clicking,
+        type: int, value: 1 }
+    - { name: Enable tap to click for this user and for the login screen 2/4, domain: com.apple.AppleMultitouchTrackpad, key: Clicking,
+        type: int, value: 1 }
+    - { name: Enable tap to click for this user and for the login screen 3/4, host: currentHost, domain: NSGlobalDomain, key: com.apple.mouse.tapBehavior,
+        type: int, value: 1 }
+    - { name: Enable tap to click for this user and for the login screen 4/4, domain: NSGlobalDomain, key: com.apple.mouse.tapBehavior,
+        type: int, value: 1 }

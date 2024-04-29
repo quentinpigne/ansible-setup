@@ -1,0 +1,7 @@
+---
+- name: Install global NPM packages
+  community.general.npm:
+    name: "{{ item }}"
+    global: true
+  with_items: "{{ npm.packages }}"
+  tags: npm, package

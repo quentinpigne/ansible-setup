@@ -1,0 +1,5 @@
+---
+- name: Flush DNS cache
+  ansible.builtin.command: dscacheutil -flushcache
+  changed_when: false
+  become: true
