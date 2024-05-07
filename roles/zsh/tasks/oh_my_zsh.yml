@@ -1,0 +1,13 @@
+---
+- name: Check for .oh-my-zsh exists
+  ansible.builtin.stat:
+    path: /Users/{{ username }}/.oh-my-zsh
+  register: ohmyzsh_folder
+  tags: zsh
+
+- name: Install Oh My Zsh
+  ansible.builtin.shell: |
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  when: not ohmyzsh_folder.stat.exists
+  changed_when: true
+  tags: zsh

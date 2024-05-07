@@ -10,5 +10,6 @@
     - npm
     - fonts
     - zsh
+    - dotfiles
     - iterm2
     - macos_settings

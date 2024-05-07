@@ -1,0 +1,23 @@
+---
+- name: Check for .dotfiles exists
+  ansible.builtin.stat:
+    path: /{{ (ansible_facts.os_family == 'Darwin')|ternary('Users', 'home') }}/{{ username }}/.dotfiles
+  register: dotfiles_folder
+  tags: dotfiles
+
+- name: Install dotfiles
+  ansible.builtin.git:
+    repo: "git@github.com:quentinpigne/dotfiles.git"
+    dest: "/{{ (ansible_facts.os_family == 'Darwin')|ternary('Users', 'home') }}/{{ username }}/.dotfiles"
+    version: "{{ (ansible_facts.os_family == 'Darwin')|ternary('macos', 'server') }}"
+    bare: true
+  when: not dotfiles_folder.stat.exists
+  changed_when: true
+  tags: dotfiles
+
+- name: Reset dotfiles
+  ansible.builtin.shell: |
+    git --git-dir=/{{ (ansible_facts.os_family == 'Darwin')|ternary('Users', 'home') }}/{{ username }}/.dotfiles/ --work-tree=/{{ (ansible_facts.os_family == 'Darwin')|ternary('Users', 'home') }}/{{ username }} reset --hard
+  when: not dotfiles_folder.stat.exists
+  changed_when: true
+  tags: dotfiles
