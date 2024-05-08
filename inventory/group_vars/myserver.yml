@@ -1,0 +1,38 @@
+##
+# Commons
+##
+username: quentin
+group: admin
+hostname: ubuntu01
+
+##
+# Git
+##
+git:
+  username: Quentin Pigné
+  email: quentin.pigne@gmail.com
+
+##
+# APT
+##
+apt:
+  ppa: []
+
+  packages: []
+
+##
+# NPM modules
+##
+npm:
+  packages: []
+
+##
+# Network
+##
+network_configuration:
+  - interface_name: Ethernet
+    dns_servers:
+      - 1.1.1.2
+      - 1.0.0.2
+      - 2606:4700:4700::1112
+      - 2606:4700:4700::1001

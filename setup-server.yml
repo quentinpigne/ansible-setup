@@ -1,0 +1,7 @@
+---
+- name: Configure Server
+  hosts: myserver
+  roles:
+    - ssh
+    - zsh
+    - dotfiles
