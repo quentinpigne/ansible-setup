@@ -1,0 +1,11 @@
+---
+- name: Adding NeoVim PPA unstable repository
+  become: true
+  ansible.builtin.apt_repository:
+    repo: ppa:neovim-ppa/unstable
+
+- name: Installing Neovim package
+  become: true
+  ansible.builtin.apt:
+    name: neovim
+    update_cache: yes
