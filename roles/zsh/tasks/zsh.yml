@@ -1,0 +1,10 @@
+---
+- name: Installing zsh package
+  become: true
+  ansible.builtin.apt:
+    name: zsh
+    update_cache: yes
+
+- name: Setting Zsh as default interpreter
+  become: true
+  command: chsh -s /bin/zsh

@@ -1,4 +1,9 @@
 ---
+- name: Install Zsh
+  ansible.builtin.include_tasks: zsh.yml
+  when: ansible_facts.os_family == 'Debian'
+  tags: zsh
+
 - name: Install Oh My Zsh
   ansible.builtin.include_tasks: oh_my_zsh.yml
   tags: oh-my-zsh

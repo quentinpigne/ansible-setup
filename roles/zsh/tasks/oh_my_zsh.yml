@@ -1,7 +1,7 @@
 ---
 - name: Check for .oh-my-zsh exists
   ansible.builtin.stat:
-    path: /Users/{{ username }}/.oh-my-zsh
+    path: /{{ (ansible_facts.os_family == 'Darwin')|ternary('Users', 'home') }}/{{ username }}/.oh-my-zsh
   register: ohmyzsh_folder
   tags: zsh
 
