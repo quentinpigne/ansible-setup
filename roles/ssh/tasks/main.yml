@@ -1,0 +1,8 @@
+---
+- name: Configure SSH keys
+  ansible.builtin.include_tasks: keys.yml
+  tags: ssh
+
+- name: Disable SSH Password Authentication
+  ansible.builtin.include_tasks: disable_password.yml
+  tags: ssh
