@@ -4,7 +4,11 @@
   ansible.builtin.apt:
     name: zsh
     update_cache: yes
+  tags: zsh
 
 - name: Setting Zsh as default interpreter
   become: true
-  command: chsh -s /bin/zsh
+  ansible.builtin.user:
+    name: "{{ username }}"
+    shell: /bin/zsh
+  tags: zsh
