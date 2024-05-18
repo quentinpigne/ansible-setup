@@ -5,4 +5,5 @@
     - ssh
     - zsh
     - samba
+    - docker
     - dotfiles

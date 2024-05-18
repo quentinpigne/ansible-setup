@@ -1,0 +1,61 @@
+---
+- name: Make sure ca-certificates, curl and gnupg are installed
+  become: true
+  ansible.builtin.apt:
+    pkg:
+    - ca-certificates
+    - curl
+    - gnupg
+    update_cache: yes
+  tags: docker
+
+- name: Adding official Docker GPG apt Key
+  become: true
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    keyring: /etc/apt/trusted.gpg.d/docker.gpg
+    state: present
+  tags: docker
+
+- name: Adding Docker repository
+  become: true
+  ansible.builtin.apt_repository:
+    repo: "deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    filename: docker.list
+    state: present
+  tags: docker
+
+- name: Installing Docker packages
+  become: true
+  ansible.builtin.apt:
+    pkg:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    - docker-buildx-plugin
+    - docker-compose-plugin
+    update_cache: yes
+  tags: docker
+
+- name: Check Docker is active
+  become: true
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: yes
+  tags: docker
+
+- name: Ensure group "docker" exists
+  become: true
+  ansible.builtin.group:
+    name: docker
+    state: present
+  tags: docker
+
+- name: Adding user to docker group
+  become: true
+  ansible.builtin.user:
+    name: "{{ username }}"
+    groups: docker
+    append: yes
+  tags: docker
