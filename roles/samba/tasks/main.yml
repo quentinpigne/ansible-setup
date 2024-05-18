@@ -1,0 +1,21 @@
+---
+- name: Installing Samba package
+  become: true
+  ansible.builtin.apt:
+    name: samba
+    update_cache: yes
+  tags: samba
+
+- name: Copy samba configuration file
+  become: true
+  ansible.builtin.template:
+    src: "samba/smb.conf.j2"
+    dest: "/etc/samba/smb.conf"
+    mode: "0644"
+  tags: samba
+
+- name: Restart service samba
+  ansible.builtin.service:
+    name: samba
+    state: restarted
+  tags: samba
