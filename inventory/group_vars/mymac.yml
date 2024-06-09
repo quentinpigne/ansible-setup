@@ -32,12 +32,15 @@ homebrew:
 
   casks:
     - bitwarden
+    - blender@lts
     - brave-browser
     - discord
+    - dolphin
     - figma
     - iterm2
     - microsoft-office
     - microsoft-teams
+    - minecraft
     - notion
     - obs
     - openemu
@@ -123,6 +126,7 @@ dock:
     - /Applications/Spotify.app
     - /Applications/OpenEmu.app
     - /Applications/Steam.app
+    - /Applications/Blender.app
     - "\"/Applications/Visual Studio Code.app\""
     - /Applications/iTerm.app
     - "\"/System/Applications/System Settings.app\""
@@ -134,7 +138,7 @@ dock:
     - /Applications/
 
   # Reset Launchpad
-  reset_launchpad: false
+  reset_launchpad: true
 
 ##
 # Finder settings
