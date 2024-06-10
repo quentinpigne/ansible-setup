@@ -101,6 +101,8 @@ dock:
   defaults:
     - { name: Don't automatically rearrange Spaces based on most recent use, key: mru-spaces, type: bool, value: false }
     - { name: Don't show recent applications in Dock, key: show-recents, type: bool, value: false }
+    - { name: Scale effect when reducing applications, key: mineffect, type: string, value: scale }
+    - { name: Minimize into application icons, key: minimize-to-application, type: bool, value: true }
     - { name: Set size of icons, key: tilesize, type: integer, value: 32 }
     - { name: Hot corners - Top left corner 1/2, key: wvous-tl-corner, type: int, value: 0 }
     - { name: Hot corners - Top left corner 2/2, key: wvous-tl-modifier, type: int, value: 0 }
