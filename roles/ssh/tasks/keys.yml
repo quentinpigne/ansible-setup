@@ -4,12 +4,15 @@
     src: ~/.ssh/id_rsa
     dest: ~/.ssh/
     mode: "preserve"
+  tags: ssh
 
 - name: Copy public SSH key to hosts
   copy:
     src: ~/.ssh/id_rsa.pub
     dest: ~/.ssh/
     mode: "preserve"
+  tags: ssh
 
 - name: Add public SSH key to authorized_keys
   shell: cat ~/.ssh/id_rsa.pub > ~/.ssh/authorized_keys
+  tags: ssh
