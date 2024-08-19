@@ -1,0 +1,88 @@
+---
+- name: Disabling swap
+  ansible.builtin.include_tasks: swap.yml
+  tags: kubernetes
+
+- name: Installing Containerd
+  ansible.builtin.include_tasks: containerd.yml
+  tags: kubernetes
+
+- name: Installing Runc and CNI
+  ansible.builtin.include_tasks: others_install.yml
+  tags: kubernetes
+
+- name: Enabling IP forward
+  become: true
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: true
+    state: present
+    reload: true
+  tags: kubernetes
+
+- name: Make sure apt-transport-https, ca-certificates, curl and gpg are installed
+  become: true
+  ansible.builtin.apt:
+    pkg:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gpg
+    update_cache: yes
+  tags: kubernetes
+
+- name: Adding official Kubernetes GPG apt Key
+  become: true
+  ansible.builtin.apt_key:
+    url: https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key
+    keyring: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    state: present
+  tags: kubernetes
+
+- name: Adding Kubernetes repository
+  become: true
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /"
+    filename: kubernetes.list
+    state: present
+  tags: kubernetes
+
+- name: Installing Kubernetes packages
+  become: true
+  ansible.builtin.apt:
+    pkg:
+    - kubelet
+    - kubeadm
+    - kubectl
+    update_cache: yes
+  tags: kubernetes
+
+- name: Check Kubernetes is active and enabled
+  become: true
+  ansible.builtin.service:
+    name: kubelet
+    state: started
+    enabled: yes
+  tags: kubernetes
+
+- name: Initialize Kubernetes cluster with kubeadm
+  become: true
+  command: kubeadm init --pod-network-cidr=10.244.0.0/16
+  tags: kubernetes
+
+- name: Copy kubectl config file to user directory
+  become: true
+  ansible.builtin.copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/{{ username }}/.kube/config
+    remote_src: false
+  tags: kubernetes
+
+- name: Fetch the config file
+  become: true
+  ansible.builtin.fetch:
+    src: /etc/kubernetes/admin.conf
+    dest: .kube/config
+    flat: yes
+  tags: kubernetes

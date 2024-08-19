@@ -1,0 +1,14 @@
+---
+- name: Disable swap for current session
+  become: true
+  command : swapoff -a
+  tags: kubernetes
+
+- name: Disable swap permanently, persist across reboots
+  become: true
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
+    replace: '#\1\2\3swap\4'
+    backup: true
+  tags: kubernetes
