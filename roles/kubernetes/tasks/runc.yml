@@ -1,5 +1,6 @@
 ---
 - name: Download Runc
+  become: true
   ansible.builtin.get_url:
     url: https://github.com/opencontainers/runc/releases/download/v1.2.0-rc.2/runc.amd64
     dest: /home/{{ username }}
@@ -15,18 +16,4 @@
   ansible.builtin.file:
     path: /home/{{ username }}/runc.amd64
     state: absent
-  tags: kubernetes
-
-- name: Create CNI installation directory
-  ansible.builtin.file:
-    path: /opt/cni/bin
-    state: directory
-  tags: kubernetes
-
-- name: Download and install CNI
-  become: true
-  ansible.builtin.unarchive:
-    src: https://github.com/containernetworking/plugins/releases/download/v1.5.1/cni-plugins-linux-amd64-v1.5.1.tgz
-    dest: /opt/cni/bin
-    remote_src: yes
   tags: kubernetes

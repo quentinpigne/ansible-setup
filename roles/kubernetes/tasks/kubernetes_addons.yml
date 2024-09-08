@@ -1,0 +1,45 @@
+---
+- name: Deploy Flannel
+  become: true
+  kubernetes.core.k8s:
+    state: present
+    src: https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+  tags: kubernetes
+
+- name: Download Metric Server deployment file
+  become: true
+  ansible.builtin.get_url:
+    url: https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+    dest: /home/{{ username }}
+  tags: kubernetes
+
+- name: Add TLS insecure option to Metric Server deployment file
+  become: true
+  ansible.builtin.lineinfile:
+    path: /home/{{ username }}/components.yaml
+    insertafter: "--secure-port=10250$"
+    line: "        - --kubelet-insecure-tls"
+    firstmatch: yes
+    state: present
+  tags: kubernetes
+
+- name: Deploy Metric Server
+  become: true
+  kubernetes.core.k8s:
+    state: present
+    src: /home/{{ username }}/components.yaml
+  tags: kubernetes
+
+- name: Remove Metric Server deployment file
+  become: true
+  ansible.builtin.file:
+    path: /home/{{ username }}/components.yaml
+    state: absent
+  tags: kubernetes
+
+- name: Deploy Nginx ingress controller
+  become: true
+  kubernetes.core.k8s:
+    state: present
+    src: https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.2/deploy/static/provider/baremetal/deploy.yaml
+  tags: kubernetes

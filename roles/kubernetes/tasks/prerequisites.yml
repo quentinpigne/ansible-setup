@@ -12,3 +12,13 @@
     replace: '#\1\2\3swap\4'
     backup: true
   tags: kubernetes
+
+- name: Enabling IP forward
+  become: true
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: true
+    state: present
+    reload: true
+  tags: kubernetes

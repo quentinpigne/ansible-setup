@@ -1,88 +1,32 @@
 ---
-- name: Disabling swap
-  ansible.builtin.include_tasks: swap.yml
+- name: Prerequisites
+  ansible.builtin.include_tasks: prerequisites.yml
   tags: kubernetes
 
 - name: Installing Containerd
   ansible.builtin.include_tasks: containerd.yml
   tags: kubernetes
 
-- name: Installing Runc and CNI
-  ansible.builtin.include_tasks: others_install.yml
+- name: Installing Runc
+  ansible.builtin.include_tasks: runc.yml
   tags: kubernetes
 
-- name: Enabling IP forward
-  become: true
-  ansible.posix.sysctl:
-    name: net.ipv4.ip_forward
-    value: '1'
-    sysctl_set: true
-    state: present
-    reload: true
+- name: Installing CNI
+  ansible.builtin.include_tasks: cni.yml
   tags: kubernetes
 
-- name: Make sure apt-transport-https, ca-certificates, curl and gpg are installed
-  become: true
-  ansible.builtin.apt:
-    pkg:
-    - apt-transport-https
-    - ca-certificates
-    - curl
-    - gpg
-    update_cache: yes
+- name: Installing Kubernetes
+  ansible.builtin.include_tasks: kubernetes_install.yml
   tags: kubernetes
 
-- name: Adding official Kubernetes GPG apt Key
-  become: true
-  ansible.builtin.apt_key:
-    url: https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key
-    keyring: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-    state: present
+- name: Initializing Kubernetes
+  ansible.builtin.include_tasks: kubernetes_init.yml
   tags: kubernetes
 
-- name: Adding Kubernetes repository
-  become: true
-  ansible.builtin.apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /"
-    filename: kubernetes.list
-    state: present
+- name: Installing Kubernetes addons
+  ansible.builtin.include_tasks: kubernetes_addons.yml
   tags: kubernetes
 
-- name: Installing Kubernetes packages
-  become: true
-  ansible.builtin.apt:
-    pkg:
-    - kubelet
-    - kubeadm
-    - kubectl
-    update_cache: yes
-  tags: kubernetes
-
-- name: Check Kubernetes is active and enabled
-  become: true
-  ansible.builtin.service:
-    name: kubelet
-    state: started
-    enabled: yes
-  tags: kubernetes
-
-- name: Initialize Kubernetes cluster with kubeadm
-  become: true
-  command: kubeadm init --pod-network-cidr=10.244.0.0/16
-  tags: kubernetes
-
-- name: Copy kubectl config file to user directory
-  become: true
-  ansible.builtin.copy:
-    src: /etc/kubernetes/admin.conf
-    dest: /home/{{ username }}/.kube/config
-    remote_src: false
-  tags: kubernetes
-
-- name: Fetch the config file
-  become: true
-  ansible.builtin.fetch:
-    src: /etc/kubernetes/admin.conf
-    dest: .kube/config
-    flat: yes
+- name: Installing HAProxy
+  ansible.builtin.include_tasks: haproxy.yml
   tags: kubernetes

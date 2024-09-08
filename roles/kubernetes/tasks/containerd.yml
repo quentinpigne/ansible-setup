@@ -46,4 +46,3 @@
     enabled: true
     daemon_reload: true
   tags: kubernetes
-

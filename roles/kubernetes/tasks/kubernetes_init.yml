@@ -1,0 +1,23 @@
+---
+- name: Initialize Kubernetes cluster with kubeadm
+  become: true
+  command: kubeadm init --pod-network-cidr=10.244.0.0/16
+  tags: kubernetes
+
+- name: Copy kubectl config file to user directory
+  become: true
+  ansible.builtin.copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/{{ username }}/.kube/config
+    remote_src: true
+    owner: '{{ username }}'
+    group: '{{ username }}'
+  tags: kubernetes
+
+- name: Fetch the config file
+  become: true
+  ansible.builtin.fetch:
+    src: /etc/kubernetes/admin.conf
+    dest: ~/.kube/config
+    flat: yes
+  tags: kubernetes

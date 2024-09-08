@@ -1,0 +1,50 @@
+---
+- name: Make sure software-properties-common is installed
+  become: true
+  ansible.builtin.apt:
+    name: software-properties-common
+    update_cache: yes
+    install_recommends: false
+  tags: kubernetes
+
+- name: Add HAProxy PPA repository
+  become: true
+  ansible.builtin.apt_repository:
+    repo: ppa:vbernat/haproxy-3.0
+
+- name: Install HAProxy
+  become: true
+  ansible.builtin.apt:
+    name: haproxy=3.0.\*
+    update_cache: yes
+  tags: kubernetes
+
+- name: Get Nginx ingress controller NodePort
+  ansible.builtin.shell: kubectl get svc -n ingress-nginx ingress-nginx-controller -o=jsonpath='{.spec.ports[?(@.port==80)].nodePort}'
+  register: result
+  tags: kubernetes
+
+- name: Insert configuration block to HAProxy configuration file
+  become: true
+  ansible.builtin.blockinfile:
+    path: /etc/haproxy/haproxy.cfg
+    append_newline: true
+    prepend_newline: true
+    block: |
+      frontend Local_Server_80
+        bind *:80
+        mode http
+        default_backend web-server-ingress_80
+
+      backend web-server-ingress_80
+        mode http
+        balance roundrobin
+        server ingress1 localhost:{{ result.stdout }}
+  tags: kubernetes
+
+- name: Restart HAProxy service
+  become: true
+  ansible.builtin.systemd_service:
+    name: haproxy
+    state: restarted
+  tags: kubernetes
