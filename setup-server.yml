@@ -1,6 +1,7 @@
 ---
 - name: Configure Server
   hosts: myserver
+  connection: paramiko
   roles:
     - ssh
     - zsh
