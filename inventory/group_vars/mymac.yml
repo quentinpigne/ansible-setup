@@ -20,19 +20,23 @@ homebrew:
 
   formulae:
     - ansible
+    - docker
     - gcc
     - git
     - git-lfs
     - go
+    - helm
+    - kubectl
     - node
     - openjdk
     - openjdk@17
+    - openjdk@21
     - python@3.12
     - rust
 
   casks:
     - bitwarden
-    - blender@lts
+    - blender
     - brave-browser
     - discord
     - dolphin
@@ -103,6 +107,7 @@ dock:
     - { name: Don't show recent applications in Dock, key: show-recents, type: bool, value: false }
     - { name: Scale effect when reducing applications, key: mineffect, type: string, value: scale }
     - { name: Minimize into application icons, key: minimize-to-application, type: bool, value: true }
+    - { name: Enable sound beep feedback, key: com.apple.sound.beep.feedback, type: bool, value: true }
     - { name: Set size of icons, key: tilesize, type: integer, value: 32 }
     - { name: Hot corners - Top left corner 1/2, key: wvous-tl-corner, type: int, value: 0 }
     - { name: Hot corners - Top left corner 2/2, key: wvous-tl-modifier, type: int, value: 0 }
@@ -117,7 +122,7 @@ dock:
   display_applications:
     - "\"/Applications/Brave Browser.app\""
     - "\"/Applications/Microsoft Outlook.app\""
-    - "\"/Applications/Microsoft Teams (work or school).app\""
+    - "\"/Applications/Microsoft Teams.app\""
     - /Applications/Discord.app
     - "\"/Applications/Microsoft Word.app\""
     - "\"/Applications/Microsoft Excel.app\""
