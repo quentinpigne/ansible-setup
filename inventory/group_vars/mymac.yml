@@ -25,13 +25,15 @@ homebrew:
     - git
     - git-lfs
     - go
+    - gradle
     - helm
     - kubectl
+    - maven
     - node
     - openjdk
     - openjdk@17
     - openjdk@21
-    - python@3.12
+    - python@3.13
     - rust
 
   casks:
