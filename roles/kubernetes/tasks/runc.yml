@@ -2,7 +2,7 @@
 - name: Download Runc
   become: true
   ansible.builtin.get_url:
-    url: https://github.com/opencontainers/runc/releases/download/v1.2.0-rc.2/runc.amd64
+    url: https://github.com/opencontainers/runc/releases/download/v1.2.2/runc.amd64
     dest: /home/{{ username }}
   tags: kubernetes
 

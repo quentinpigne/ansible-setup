@@ -8,7 +8,7 @@
 - name: Download and install CNI
   become: true
   ansible.builtin.unarchive:
-    src: https://github.com/containernetworking/plugins/releases/download/v1.5.1/cni-plugins-linux-amd64-v1.5.1.tgz
+    src: https://github.com/containernetworking/plugins/releases/download/v1.6.0/cni-plugins-linux-amd64-v1.6.0.tgz
     dest: /opt/cni/bin
     remote_src: yes
   tags: kubernetes

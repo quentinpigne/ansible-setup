@@ -41,5 +41,5 @@
   become: true
   kubernetes.core.k8s:
     state: present
-    src: https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.2/deploy/static/provider/baremetal/deploy.yaml
+    src: https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.3/deploy/static/provider/baremetal/deploy.yaml
   tags: kubernetes

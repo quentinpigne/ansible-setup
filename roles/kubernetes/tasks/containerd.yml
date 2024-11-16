@@ -2,7 +2,7 @@
 - name: Download and install Containerd
   become: true
   ansible.builtin.unarchive:
-    src: https://github.com/containerd/containerd/releases/download/v1.6.35/containerd-1.6.35-linux-amd64.tar.gz
+    src: https://github.com/containerd/containerd/releases/download/v2.0.0/containerd-2.0.0-linux-amd64.tar.gz
     dest: /usr/local
     remote_src: yes
   tags: kubernetes

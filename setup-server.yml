@@ -5,6 +5,7 @@
   roles:
     - ssh
     - zsh
+    - nvim
     - samba
     - docker
     - dotfiles
