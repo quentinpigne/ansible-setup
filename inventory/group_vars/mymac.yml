@@ -20,21 +20,29 @@ homebrew:
 
   formulae:
     - ansible
+    - bat
     - docker
+    - eza
+    - fd
+    - fzf
     - gcc
     - git
     - git-lfs
     - go
     - gradle
     - helm
+    - hugo
     - kubectl
     - maven
     - node
+    - nvim
     - openjdk
     - openjdk@17
     - openjdk@21
     - python@3.13
+    - ripgrep
     - rust
+    - uv
 
   casks:
     - bitwarden
