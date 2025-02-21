@@ -3,9 +3,11 @@
   become: true
   ansible.builtin.apt_repository:
     repo: ppa:neovim-ppa/unstable
+  tags: nvim
 
 - name: Installing Neovim package
   become: true
   ansible.builtin.apt:
     name: neovim
     update_cache: yes
+  tags: nvim
