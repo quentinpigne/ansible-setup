@@ -8,23 +8,23 @@
     - curl
     - gpg
     update_cache: yes
-  tags: kubernetes
+  tags: install
 
 - name: Adding official Kubernetes GPG apt Key
   become: true
   ansible.builtin.apt_key:
-    url: https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key
+    url: https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key
     keyring: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
     state: present
-  tags: kubernetes
+  tags: install
 
 - name: Adding Kubernetes repository
   become: true
   ansible.builtin.apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /"
+    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /"
     filename: kubernetes.list
     state: present
-  tags: kubernetes
+  tags: install
 
 - name: Installing Kubernetes packages
   become: true
@@ -34,7 +34,7 @@
     - kubeadm
     - kubectl
     update_cache: yes
-  tags: kubernetes
+  tags: install
 
 - name: Check Kubernetes is active and enabled
   become: true
@@ -42,4 +42,4 @@
     name: kubelet
     state: started
     enabled: yes
-  tags: kubernetes
+  tags: install

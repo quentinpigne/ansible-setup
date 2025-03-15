@@ -2,18 +2,18 @@
 - name: Download Runc
   become: true
   ansible.builtin.get_url:
-    url: https://github.com/opencontainers/runc/releases/download/v1.2.2/runc.amd64
+    url: https://github.com/opencontainers/runc/releases/download/v1.2.5/runc.amd64
     dest: /home/{{ username }}
-  tags: kubernetes
+  tags: runc
 
 - name: Install Runc
   become: true
   ansible.builtin.shell: install -m 755 runc.amd64 /usr/local/sbin/runc
-  tags: kubernetes
+  tags: runc
 
 - name: Remove install file
   become: true
   ansible.builtin.file:
     path: /home/{{ username }}/runc.amd64
     state: absent
-  tags: kubernetes
+  tags: runc

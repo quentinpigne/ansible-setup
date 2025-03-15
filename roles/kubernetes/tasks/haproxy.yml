@@ -5,24 +5,25 @@
     name: software-properties-common
     update_cache: yes
     install_recommends: false
-  tags: kubernetes
+  tags: haproxy
 
 - name: Add HAProxy PPA repository
   become: true
   ansible.builtin.apt_repository:
     repo: ppa:vbernat/haproxy-3.0
+  tags: haproxy
 
 - name: Install HAProxy
   become: true
   ansible.builtin.apt:
     name: haproxy=3.0.\*
     update_cache: yes
-  tags: kubernetes
+  tags: haproxy
 
 - name: Get Nginx ingress controller NodePort
   ansible.builtin.shell: kubectl get svc -n ingress-nginx ingress-nginx-controller -o=jsonpath='{.spec.ports[?(@.port==80)].nodePort}'
   register: result
-  tags: kubernetes
+  tags: haproxy
 
 - name: Insert configuration block to HAProxy configuration file
   become: true
@@ -40,11 +41,11 @@
         mode http
         balance roundrobin
         server ingress1 localhost:{{ result.stdout }}
-  tags: kubernetes
+  tags: haproxy
 
 - name: Restart HAProxy service
   become: true
   ansible.builtin.systemd_service:
     name: haproxy
     state: restarted
-  tags: kubernetes
+  tags: haproxy

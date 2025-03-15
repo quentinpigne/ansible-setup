@@ -2,7 +2,7 @@
 - name: Disable swap for current session
   become: true
   command : swapoff -a
-  tags: kubernetes
+  tags: prerequisites
 
 - name: Disable swap permanently, persist across reboots
   become: true
@@ -11,7 +11,7 @@
     regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
     replace: '#\1\2\3swap\4'
     backup: true
-  tags: kubernetes
+  tags: prerequisites
 
 - name: Enabling IP forward
   become: true
@@ -21,4 +21,23 @@
     sysctl_set: true
     state: present
     reload: true
-  tags: kubernetes
+  tags: prerequisites
+
+- name: Create sysctl config file
+  become: true
+  ansible.builtin.copy:
+    dest: "/etc/sysctl.d/10-kubernetes-cri.conf"
+    content: |
+      net.bridge.bridge-nf-call-iptables = 1
+      net.bridge.bridge-nf-nall-ip6tables = 1
+      net.ipv4.ip_forward = 1
+  tags: prerequisites
+
+- name: Create modules-load config file
+  become: true
+  ansible.builtin.copy:
+    dest: "/etc/modules-load.d/kubernetes.conf"
+    content: |
+      overlay
+      br_netfilter
+  tags: prerequisites

@@ -5,38 +5,38 @@
     src: https://github.com/containerd/containerd/releases/download/v2.0.0/containerd-2.0.0-linux-amd64.tar.gz
     dest: /usr/local
     remote_src: yes
-  tags: kubernetes
+  tags: containerd
 
 - name: Create Containerd config directory
   become: true
   ansible.builtin.file:
     path: /etc/containerd
     state: directory
-  tags: kubernetes
+  tags: containerd
 
 - name: Get Containerd default configuration
   become: true
   ansible.builtin.shell: containerd config default | tee /etc/containerd/config.toml
-  tags: kubernetes
+  tags: containerd
 
 - name: Activate systemd cgroup
   become: true
   ansible.builtin.shell: sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
-  tags: kubernetes
+  tags: containerd
 
 - name: Create systemd services directory
   become: true
   ansible.builtin.file:
     path: /etc/systemd/system
     state: directory
-  tags: kubernetes
+  tags: containerd
 
 - name: Download service configuration file
   become: true
   ansible.builtin.get_url:
     url: https://raw.githubusercontent.com/containerd/containerd/main/containerd.service
     dest: /etc/systemd/system/containerd.service
-  tags: kubernetes
+  tags: containerd
 
 - name: Enabling Containerd service
   become: true
@@ -45,4 +45,4 @@
     state: started
     enabled: true
     daemon_reload: true
-  tags: kubernetes
+  tags: containerd
