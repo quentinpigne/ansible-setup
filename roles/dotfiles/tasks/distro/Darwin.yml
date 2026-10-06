@@ -1,0 +1,11 @@
+---
+- name: Install chezmoi with Homebrew
+  community.general.homebrew:
+    name: chezmoi
+    state: present
+  tags: [dotfiles]
+
+- name: Locate the chezmoi binary
+  ansible.builtin.set_fact:
+    chezmoi_bin: "{{ homebrew_prefix }}/bin/chezmoi"
+  tags: [dotfiles]

@@ -1,23 +1,91 @@
 ---
-- name: Check for .dotfiles exists
+- name: Install chezmoi
+  ansible.builtin.include_tasks: "{{ lookup('ansible.builtin.first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_facts.distribution }}.yml"
+        - "{{ distro_family }}.yml"
+      paths:
+        - distro
+  tags: [dotfiles]
+
+# Le depot dotfiles est prive : son clone exige une cle SSH deja en place.
+# Sans ce controle, l'echec surviendrait plus loin, sur une erreur de clone
+# peu parlante.
+- name: Look for an SSH private key
+  ansible.builtin.find:
+    paths: "{{ user_home }}/.ssh"
+    patterns: "id_*"
+    excludes: "*.pub"
+    file_type: file
+  register: dotfiles_ssh_keys
+  when: dotfiles_repo is match('.*@.*:')
+  tags: [dotfiles]
+
+- name: Ensure an SSH key is available for the private dotfiles repository
+  ansible.builtin.assert:
+    that: dotfiles_ssh_keys.files | default([]) | length > 0
+    fail_msg: >-
+      Aucune cle SSH dans {{ user_home }}/.ssh : le depot dotfiles
+      ({{ dotfiles_repo }}) est prive et ne pourra pas etre clone.
+      Poser la cle (chmod 600) et l'ajouter a GitHub, puis relancer.
+      Pour configurer la machine sans les dotfiles en attendant :
+      base_skip: [dotfiles] dans son host_vars.
+    success_msg: "Cle SSH trouvee : {{ dotfiles_ssh_keys.files | map(attribute='path') | map('basename') | join(', ') }}"
+  when: dotfiles_repo is match('.*@.*:')
+  tags: [dotfiles]
+
+# Les secrets du depot sont chiffres avec age. Sans cette cle ils restent
+# illisibles : elle ne se regenere pas, elle se recopie depuis une machine
+# deja configuree.
+- name: Check for the age encryption key
   ansible.builtin.stat:
-    path: /{{ (ansible_facts.os_family == 'Darwin')|ternary('Users', 'home') }}/{{ username }}/.dotfiles
-  register: dotfiles_folder
-  tags: dotfiles
+    path: "{{ user_home }}/.config/chezmoi/key.txt"
+  register: dotfiles_age_key
+  tags: [dotfiles]
 
-- name: Install dotfiles
-  ansible.builtin.git:
-    repo: "git@github.com:quentinpigne/dotfiles.git"
-    dest: "/{{ (ansible_facts.os_family == 'Darwin')|ternary('Users', 'home') }}/{{ username }}/.dotfiles"
-    version: "{{ (ansible_facts.os_family == 'Darwin')|ternary('macos', 'server') }}"
-    bare: true
-  when: not dotfiles_folder.stat.exists
-  changed_when: true
-  tags: dotfiles
+- name: Warn when the age key is missing
+  ansible.builtin.debug:
+    msg: >-
+      {{ user_home }}/.config/chezmoi/key.txt est absent : les fichiers
+      chiffres ne seront pas deployes. Copier la cle depuis une machine deja
+      configuree (chmod 600), puis relancer --tags dotfiles.
+  when: not dotfiles_age_key.stat.exists
+  tags: [dotfiles]
 
-- name: Reset dotfiles
-  ansible.builtin.shell: |
-    git --git-dir=/{{ (ansible_facts.os_family == 'Darwin')|ternary('Users', 'home') }}/{{ username }}/.dotfiles/ --work-tree=/{{ (ansible_facts.os_family == 'Darwin')|ternary('Users', 'home') }}/{{ username }} reset --hard
-  when: not dotfiles_folder.stat.exists
+# `--no-tty` impose de fournir les reponses par flags : sans elles, le
+# template echoue sur EOF. Le separateur des choix multiples est le slash,
+# la virgule etant consommee par l'analyseur de flags de chezmoi.
+- name: Initialise the dotfiles
+  ansible.builtin.command:
+    cmd: >-
+      {{ chezmoi_bin }} init --apply --no-tty
+      --promptChoice profile={{ dotfiles_profile }}
+      --promptMultichoice langs={{ dotfiles_langs | join('/') }}
+      {{ dotfiles_repo }}
+    creates: "{{ dotfiles_source_dir }}"
+  tags: [dotfiles, dotfiles-init]
+
+# Sur une machine deja initialisee, `status` liste ce qui differe : il rend la
+# tache d'application idempotente et le rapport Ansible honnete.
+- name: Check for pending dotfiles changes
+  ansible.builtin.command: "{{ chezmoi_bin }} status"
+  register: dotfiles_status
+  changed_when: false
+  check_mode: false
+  failed_when: false
+  tags: [dotfiles]
+
+- name: Apply the dotfiles
+  ansible.builtin.command: "{{ chezmoi_bin }} apply --no-tty"
+  when:
+    - dotfiles_status.rc | default(1) == 0
+    - dotfiles_status.stdout | default('') | length > 0
+  tags: [dotfiles]
+
+# Non joue par defaut : `--tags dotfiles-update` tire les derniers commits.
+- name: Update the dotfiles from the remote
+  ansible.builtin.command: "{{ chezmoi_bin }} update --no-tty"
   changed_when: true
-  tags: dotfiles
+  tags: [never, dotfiles-update]

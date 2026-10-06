@@ -1,0 +1,29 @@
+---
+# Depot dotfiles, gere par chezmoi et mono-branche : les specificites machine
+# sont des donnees, plus des branches.
+#
+# Le depot est prive : le clone exige une cle SSH deja en place sur la machine.
+dotfiles_repo: git@github.com:quentinpigne/dotfiles.git
+
+# Profil chezmoi, derive du contexte Ansible.
+# Les vocabulaires different : `pro` cote Ansible, `work` cote dotfiles.
+dotfiles_profile: "{{ {'perso': 'perso', 'pro': 'work'}[context] }}"
+
+# Langues connues des templates chezmoi (.chezmoiignore, dot_zshrc.tmpl).
+# `node` n'en fait volontairement pas partie.
+dotfiles_supported_langs:
+  - java
+  - python
+  - ruby
+  - go
+  - rust
+
+# Langues activees dans les dotfiles : celles installees sur la machine, dans
+# la limite de ce que chezmoi connait. Surchargeable par host_vars.
+#
+# Attention : le template utilise promptMultichoiceOnce, donc cette valeur
+# n'est lue qu'a la premiere initialisation. Pour la changer ensuite, editer
+# ~/.config/chezmoi/chezmoi.toml ou relancer avec --tags dotfiles-init.
+dotfiles_langs: "{{ extras | default([]) | intersect(dotfiles_supported_langs) }}"
+
+dotfiles_source_dir: "{{ user_home }}/.local/share/chezmoi"
