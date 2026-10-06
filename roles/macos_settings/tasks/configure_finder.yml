@@ -6,25 +6,42 @@
     type: "{{ item.type }}"
     value: "{{ item.value }}"
     state: present
-  with_items: "{{ finder.defaults }}"
+  loop: "{{ finder.defaults }}"
+  loop_control:
+    label: "{{ item.name }}"
   notify: Kill Finder
-  tags: finder, defaults
+  tags: [finder, defaults]
 
-- name: Finder - Show folders
-  ansible.builtin.command: chflags nohidden {{ item }}
-  with_items: "{{ finder.show_folders }}"
-  become: true
+# Ni `become` ni `~` ici : sous become, `~` designe le home de root, et la
+# tache demasquait /var/root/Library au lieu du dossier de l'utilisateur.
+- name: Finder - Check the hidden flag of the folders
+  ansible.builtin.command: "stat -f %Sf {{ item }}"
+  loop: "{{ finder.show_folders | map('regex_replace', '^~', user_home) | list }}"
+  register: finder_flags
   changed_when: false
-  notify: Kill Finder
-  tags: finder, defaults, folders
+  check_mode: false
+  failed_when: false
+  tags: [finder, folders]
 
-- name: Finder - Remove tags
+- name: Finder - Show the folders
+  ansible.builtin.command: "chflags nohidden {{ item.item }}"
+  loop: "{{ finder_flags.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - item.rc | default(1) == 0
+    - "'hidden' in item.stdout | default('')"
+  notify: Kill Finder
+  tags: [finder, folders]
+
+- name: Finder - Remove the default tags
   ansible.builtin.shell: |
-    /usr/libexec/PlistBuddy -c "Delete :FavoriteTagNames" ~/Library/Preferences/com.apple.finder.plist
-    /usr/libexec/PlistBuddy -c "Add :FavoriteTagNames array" ~/Library/Preferences/com.apple.finder.plist
-    /usr/libexec/PlistBuddy -c "Add :FavoriteTagNames:0 string" ~/Library/Preferences/com.apple.finder.plist
+    /usr/libexec/PlistBuddy -c "Delete :FavoriteTagNames" {{ finder_plist }}
+    /usr/libexec/PlistBuddy -c "Add :FavoriteTagNames array" {{ finder_plist }}
+    /usr/libexec/PlistBuddy -c "Add :FavoriteTagNames:0 string" {{ finder_plist }}
+  vars:
+    finder_plist: "{{ user_home }}/Library/Preferences/com.apple.finder.plist"
   when: finder.remove_tags
-  become: true
-  changed_when: false
+  changed_when: true
   notify: Kill Finder
-  tags: finder, defaults, tags
+  tags: [finder, tags]

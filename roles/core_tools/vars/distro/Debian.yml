@@ -1,0 +1,25 @@
+---
+# Attention aux binaires renommes par Debian/Ubuntu :
+#   bat      -> /usr/bin/batcat
+#   fd-find  -> /usr/bin/fdfind
+# Les alias correspondants doivent exister dans la branche Linux des dotfiles.
+core_tools_package_names:
+  ansible: ansible
+  bat: bat
+  eza: eza
+  fd: fd-find
+  fzf: fzf
+  git: git
+  git-lfs: git-lfs
+  htop: htop
+  jq: jq
+  mc: mc
+  neovim: neovim
+  ripgrep: ripgrep
+  tree: tree
+
+# Depots necessaires avant installation.
+# Le PPA neovim vient de l'ancien role nvim : la version des depots Ubuntu
+# est trop ancienne.
+core_tools_repositories:
+  - ppa:neovim-ppa/unstable

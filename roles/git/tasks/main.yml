@@ -1,0 +1,24 @@
+---
+# `git` designe ici le dictionnaire d'inventaire (username / email), pas le
+# binaire : il est surcharge par host_vars pour une machine pro.
+- name: Set the Git identity
+  community.general.git_config:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    scope: global
+  loop:
+    - { key: user.name, value: "{{ git.username }}" }
+    - { key: user.email, value: "{{ git.email }}" }
+  loop_control:
+    label: "{{ item.key }} = {{ item.value }}"
+  tags: [git, identity]
+
+- name: Apply the global Git settings
+  community.general.git_config:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    scope: global
+  loop: "{{ git_settings | dict2items }}"
+  loop_control:
+    label: "{{ item.key }} = {{ item.value }}"
+  tags: [git, settings]

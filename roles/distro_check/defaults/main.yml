@@ -1,0 +1,5 @@
+---
+# Demander interactivement quand l'inference echoue.
+# A passer a false pour un run non interactif (CI, cron) : l'execution
+# s'arretera alors nettement au lieu d'attendre une saisie.
+distro_ask: true

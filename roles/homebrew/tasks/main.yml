@@ -1,23 +1,32 @@
 ---
-- name: Update and upgrade packages for Homebrew
+# Les listes sont concatenees plutot que fusionnees : Ansible ne fusionne pas
+# les dictionnaires de group_vars (hash_behaviour = replace par defaut), donc
+# `homebrew` et `homebrew_context` portent des noms distincts.
+#   homebrew          socle commun a tout Mac        (group_vars/mac.yml)
+#   homebrew_context  propre au contexte perso/pro   (group_vars/mac_{perso,pro}.yml)
+- name: Install the Homebrew taps
+  community.general.homebrew_tap:
+    name: "{{ homebrew.taps + (homebrew_context.taps | default([])) }}"
+    state: present
+  when: (homebrew.taps + (homebrew_context.taps | default([]))) | length > 0
+  tags: [homebrew, taps]
+
+- name: Install the Homebrew formulae
+  community.general.homebrew:
+    name: "{{ homebrew.formulae + (homebrew_context.formulae | default([])) }}"
+    state: present
+  tags: [homebrew, formulae]
+
+- name: Install the Homebrew casks
+  community.general.homebrew_cask:
+    name: "{{ homebrew.casks + (homebrew_context.casks | default([])) }}"
+    state: present
+  tags: [homebrew, casks]
+
+# Non joue par defaut : `--tags upgrade`. Il etait lance a chaque execution,
+# ce qui rendait les runs longs et non deterministes.
+- name: Update and upgrade all Homebrew packages
   community.general.homebrew:
     update_homebrew: true
     upgrade_all: true
-  tags: homebrew, upgrade
-
-- name: Install homebrew taps
-  community.general.homebrew_tap:
-    name: "{{ homebrew.taps }}"
-  tags: homebrew, taps
-
-- name: Install homebrew formulae
-  community.general.homebrew:
-    name: "{{ homebrew.formulae }}"
-    state: present
-  tags: homebrew, formulae
-
-- name: Install homebrew casks
-  community.general.homebrew_cask:
-    name: "{{ homebrew.casks }}"
-    state: present
-  tags: homebrew, casks
+  tags: [never, upgrade]

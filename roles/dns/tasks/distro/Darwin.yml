@@ -1,0 +1,23 @@
+---
+# networksetup n'est pas idempotent : on lit l'etat courant avant d'ecrire,
+# pour que le rapport Ansible reflete un vrai changement.
+- name: Read the current DNS servers
+  ansible.builtin.command: networksetup -getdnsservers {{ item.interface_name | quote }}
+  loop: "{{ network_configuration }}"
+  loop_control:
+    label: "{{ item.interface_name }}"
+  register: dns_current
+  changed_when: false
+  check_mode: false
+  failed_when: false
+  tags: [dns, network]
+
+- name: Set the DNS servers
+  ansible.builtin.command: >-
+    networksetup -setdnsservers {{ item.item.interface_name | quote }}
+    {{ item.item.dns_servers | join(' ') }}
+  loop: "{{ dns_current.results }}"
+  loop_control:
+    label: "{{ item.item.interface_name }}"
+  when: item.stdout_lines | default([]) != item.item.dns_servers
+  tags: [dns, network]

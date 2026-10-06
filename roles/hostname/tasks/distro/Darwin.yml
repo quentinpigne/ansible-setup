@@ -1,0 +1,27 @@
+---
+- name: Check the current hostname
+  ansible.builtin.command: hostname
+  register: current_hostname
+  changed_when: false
+  check_mode: false
+  tags: [hostname]
+
+- name: Set the computer name
+  ansible.builtin.command: scutil --set {{ item }} {{ hostname }}
+  loop:
+    - HostName
+    - LocalHostName
+    - ComputerName
+  become: true
+  when: current_hostname.stdout != hostname
+  changed_when: current_hostname.stdout != hostname
+  notify: Flush DNS cache
+  tags: [hostname]
+
+- name: Update the NetBIOS name
+  community.general.osx_defaults:
+    domain: com.apple.smb.server
+    key: NetBIOSName
+    type: string
+    value: "{{ hostname }}"
+  tags: [hostname]

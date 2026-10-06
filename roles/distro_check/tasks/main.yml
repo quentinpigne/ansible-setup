@@ -1,0 +1,52 @@
+---
+# La distribution est inferee par defaut (distro_family = os_family, cf.
+# group_vars/all.yml). Ce role ne sert qu'aux cas ou l'inference ne suffit pas.
+- name: Ask for the distribution family when it cannot be inferred
+  ansible.builtin.pause:
+    prompt: |
+      Distribution non supportee : {{ ansible_facts.distribution | default('inconnue') }} {{ ansible_facts.distribution_version | default('') }}
+      Famille inferee : {{ ansible_facts.os_family | default('inconnue') }}
+      Familles supportees : {{ distro_supported | join(', ') }}
+      Saisir la famille a utiliser (Ctrl-C puis A pour abandonner)
+  register: distro_answer
+  when:
+    - distro_family not in distro_supported
+    - distro_ask | bool
+  tags: [distro, always]
+
+- name: Use the answered distribution family
+  ansible.builtin.set_fact:
+    distro_family: "{{ distro_answer.user_input | trim }}"
+  when:
+    - distro_answer.user_input is defined
+    - distro_answer.user_input | trim | length > 0
+  tags: [distro, always]
+
+- name: Ensure the distribution family is supported
+  ansible.builtin.assert:
+    that: distro_family in distro_supported
+    fail_msg: >-
+      Famille de distribution non supportee : {{ distro_family }}
+      (detectee : {{ ansible_facts.distribution | default('?') }}).
+      Supportees : {{ distro_supported | join(', ') }}.
+      Pour en ajouter une : creer les fichiers
+      roles/<role>/tasks/distro/{{ distro_family }}.yml et l'ajouter a
+      distro_supported. Sinon, forcer une famille compatible via
+      `distro_family` dans host_vars.
+    success_msg: "Distribution : {{ ansible_facts.distribution | default('?') }} (famille {{ distro_family }})"
+  tags: [distro, always]
+
+# Garde-fou contre une erreur de ciblage. Les hotes configures en local
+# (`ansible_connection: local`) designent la machine courante, quel que soit
+# leur nom : sans ce controle, `ansible-playbook site.yml` lance depuis le Mac
+# appliquerait la configuration de wsl-kaizen (pro / wsl / linux) au Mac.
+- name: Ensure the declared OS matches the machine
+  ansible.builtin.assert:
+    that: (os == 'mac') == (ansible_facts.os_family == 'Darwin')
+    fail_msg: >-
+      Erreur de ciblage : l'hote '{{ inventory_hostname }}' est declare
+      os={{ os }}, mais la machine repond {{ ansible_facts.os_family }}
+      ({{ ansible_facts.hostname }}). Un hote en connexion locale ne peut etre
+      configure que depuis la machine elle-meme -- verifier le --limit.
+    success_msg: "Cible : {{ inventory_hostname }} ({{ ansible_facts.hostname }}, {{ os }})"
+  tags: [distro, always]

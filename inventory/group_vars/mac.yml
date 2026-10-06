@@ -1,80 +1,77 @@
+---
 ##
 # Commons
 ##
-username: quentin
-group: staff
-hostname: MacBook-Quentin
-
-##
-# Git
-##
-git:
-  username: Quentin Pigné
-  email: quentin.pigne@gmail.com
+os: mac
+user_home: /Users/{{ username }}
+# /opt/homebrew sur Apple Silicon, /usr/local sur Intel
+homebrew_prefix: "{{ (ansible_facts.architecture == 'arm64') | ternary('/opt/homebrew', '/usr/local') }}"
 
 ##
 # Homebrew
+#
+# `formulae` / `casks` : socle commun a tout Mac.
+# `homebrew_by_context` : ce qui depend du contexte, indexe par sa valeur.
+# Le role concatene les deux (roles/homebrew), ce qui evite d'avoir a
+# fusionner des dictionnaires -- Ansible ne le fait pas dans group_vars.
 ##
 homebrew:
   taps: []
 
   formulae:
-    - ansible
-    - bat
-    - docker
-    - eza
-    - fd
-    - fzf
+    - act
     - gcc
-    - git
-    - git-lfs
-    - go
-    - gradle
     - helm
-    - hugo
-    - kubectl
-    - maven
-    - node
-    - nvim
-    - openjdk
-    - openjdk@17
-    - openjdk@21
-    - python@3.13
-    - ripgrep
-    - rust
-    - uv
+    - kubernetes-cli
+    - mas
+    - mistral-vibe
+    - mysql-client
+    - sqlite
+    - tree-sitter
 
   casks:
     - bitwarden
-    - blender
     - brave-browser
-    - discord
-    - dolphin
+    - dbeaver-community
     - figma
     - iterm2
-    - microsoft-office
-    - microsoft-teams
-    - minecraft
+    - mongodb-compass
     - notion
-    - obs
-    - openemu
-    - spotify
-    - steam
+    - obsidian
     - visual-studio-code
+
+homebrew_context: "{{ homebrew_by_context[context] | default({}) }}"
+
+homebrew_by_context:
+
+  perso:
+    formulae:
+      - arduino-cli
+      - hugo
+    casks:
+      - blender
+      - discord
+      - dolphin
+      - minecraft
+      - obs
+      - openemu
+      - protonvpn
+      - raspberry-pi-imager
+      - signal
+      - spotify
+      - steam
+
+  pro:
+    formulae: []
+    casks:
+      - microsoft-office
+      - microsoft-teams
 
 ##
 # AppStore
 ##
 appstore:
   applications: []
-
-##
-# NPM modules
-##
-npm:
-  packages:
-    - pnpm
-    - yarn
 
 ##
 # Global settings
@@ -109,9 +106,16 @@ spotlight:
     - { name: Don't show icon in menu, key: "NSStatusItem Visible Item-0", type: bool, value: false }
 
 ##
-# Dock settings
+# Dock
+#
+# `dock_common` : ce qui ne depend pas du contexte.
+# `dock_by_context` : ce qui en depend, fusionne par-dessus avec `combine`.
+# Pour un dictionnaire on fusionne (les cles du contexte remplacent celles du
+# socle) ; pour une liste on concatene, comme pour Homebrew.
 ##
-dock:
+dock: "{{ dock_common | combine(dock_by_context[context] | default({})) }}"
+
+dock_common:
   defaults:
     - { name: Don't automatically rearrange Spaces based on most recent use, key: mru-spaces, type: bool, value: false }
     - { name: Don't show recent applications in Dock, key: show-recents, type: bool, value: false }
@@ -128,34 +132,48 @@ dock:
     - { name: Hot corners - Bottom right corner 1/2, key: wvous-br-corner, type: int, value: 0 }
     - { name: Hot corners - Bottom right corner 2/2, key: wvous-br-modifier, type: int, value: 0 }
 
-  # Set applications in Dock
-  display_applications:
-    - "\"/Applications/Brave Browser.app\""
-    - "\"/Applications/Microsoft Outlook.app\""
-    - "\"/Applications/Microsoft Teams.app\""
-    - /Applications/Discord.app
-    - "\"/Applications/Microsoft Word.app\""
-    - "\"/Applications/Microsoft Excel.app\""
-    - "\"/Applications/Microsoft PowerPoint.app\""
-    - "\"/Applications/Microsoft OneNote.app\""
-    - /Applications/Notion.app
-    - /Applications/Figma.app
-    - /Applications/Spotify.app
-    - /Applications/OpenEmu.app
-    - /Applications/Steam.app
-    - /Applications/Blender.app
-    - "\"/Applications/Visual Studio Code.app\""
-    - /Applications/iTerm.app
-    - "\"/System/Applications/System Settings.app\""
+  # Valeurs plancher : un contexte absent de l'index donne un Dock vide
+  # plutot qu'une erreur de variable indefinie.
+  display_applications: []
+  display_folders: []
 
-  # Set folders in Dock
-  display_folders:
-    - /Users/quentin/Library/CloudStorage/OneDrive-Personnel/
-    - /Users/quentin/Downloads/
-    - /Applications/
-
-  # Reset Launchpad
   reset_launchpad: true
+
+dock_by_context:
+
+  perso:
+    display_applications:
+      - "\"/Applications/Brave Browser.app\""
+      - /Applications/Discord.app
+      - /Applications/Notion.app
+      - /Applications/Figma.app
+      - /Applications/Spotify.app
+      - /Applications/OpenEmu.app
+      - /Applications/Steam.app
+      - /Applications/Blender.app
+      - "\"/Applications/Visual Studio Code.app\""
+      - /Applications/iTerm.app
+      - "\"/System/Applications/System Settings.app\""
+    display_folders:
+      - "{{ user_home }}/Library/CloudStorage/OneDrive-Personnel/"
+      - "{{ user_home }}/Downloads/"
+      - /Applications/
+
+  pro:
+    display_applications:
+      - "\"/Applications/Brave Browser.app\""
+      - "\"/Applications/Microsoft Outlook.app\""
+      - "\"/Applications/Microsoft Teams.app\""
+      - "\"/Applications/Microsoft Word.app\""
+      - "\"/Applications/Microsoft Excel.app\""
+      - "\"/Applications/Microsoft PowerPoint.app\""
+      - /Applications/Notion.app
+      - "\"/Applications/Visual Studio Code.app\""
+      - /Applications/iTerm.app
+      - "\"/System/Applications/System Settings.app\""
+    display_folders:
+      - "{{ user_home }}/Downloads/"
+      - /Applications/
 
 ##
 # Finder settings
@@ -164,7 +182,7 @@ finder:
   defaults:
     - { name: Keep folders on top when sorting by name, key: _FXSortFoldersFirst, type: bool, value: true }
     - { name: Define new window location, key: NewWindowTarget, type: string, value: PfHm }
-    - { name: Define path for new window, key: NewWindowTargetPath, type: string, value: "file:///Users/{{ username }}/" }
+    - { name: Define path for new window, key: NewWindowTargetPath, type: string, value: "file://{{ user_home }}/" }
 
   # Unhide folders
   show_folders:
@@ -187,17 +205,6 @@ iterm2:
 textedit:
   defaults:
     - { name: Use plain text mode for new documents, key: RichText, type: int, value: 0 }
-
-##
-# Network
-##
-network_configuration:
-  - interface_name: Wi-Fi
-    dns_servers:
-      - 1.1.1.2
-      - 1.0.0.2
-      - 2606:4700:4700::1112
-      - 2606:4700:4700::1001
 
 ##
 # Others

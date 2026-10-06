@@ -1,0 +1,8 @@
+---
+hostname: ubuntu01
+
+##
+# Serveur Docker uniquement.
+##
+extras:
+  - docker

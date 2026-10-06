@@ -1,0 +1,6 @@
+---
+- name: Install the core tools with Homebrew
+  community.general.homebrew:
+    name: "{{ core_tools | map('extract', core_tools_package_names) | list }}"
+    state: present
+  tags: [core, tools]

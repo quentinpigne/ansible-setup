@@ -1,0 +1,19 @@
+---
+# Point d'entree unique. La config de base est composee a l'execution d'apres
+# les trois axes de la machine (contexte / profil / OS), definis par ses
+# groupes d'inventaire. Le ciblage se fait avec --limit :
+#
+#   ansible-playbook site.yml                    toutes les machines
+#   ansible-playbook site.yml --limit mac        par OS
+#   ansible-playbook site.yml --limit server     par profil
+#   ansible-playbook site.yml --limit perso      par contexte
+#   ansible-playbook site.yml --limit ubuntu01   une machine
+#
+# Les axes se combinent : --limit 'perso:&linux' vise les machines
+# personnelles sous Linux.
+- name: Configure machine
+  hosts: all
+
+  roles:
+    - role: base
+    - role: extras

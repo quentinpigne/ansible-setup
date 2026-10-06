@@ -1,0 +1,23 @@
+---
+os: linux
+user_home: /home/{{ username }}
+
+##
+# APT
+#
+# Meme principe que Homebrew cote Mac : un socle, plus une part indexee par
+# le contexte.
+##
+apt:
+  ppa: []
+  packages: []
+
+apt_context: "{{ apt_by_context[context] | default({}) }}"
+
+apt_by_context:
+  perso:
+    ppa: []
+    packages: []
+  pro:
+    ppa: []
+    packages: []

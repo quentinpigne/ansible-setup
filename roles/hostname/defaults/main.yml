@@ -1,0 +1,5 @@
+---
+# Demander le nom quand il n'est pas defini (cas d'un serveur neuf).
+# A passer a false pour un run non interactif : le role echoue alors
+# nettement au lieu d'attendre une saisie.
+hostname_ask: true

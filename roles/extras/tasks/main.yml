@@ -1,0 +1,23 @@
+---
+# Installations optionnelles, communes a tous les profils.
+#
+#   host_vars -> extras: [docker, ...]   = etat desire, rejoue a chaque run
+#   --tags docker                        = install ponctuelle, hors extras
+#
+# Deux details indispensables :
+#  - `tags: [always]` : sans lui, `--tags docker` filtrerait l'include
+#    lui-meme et aucune tache ne tournerait.
+#  - le second terme du `loop` : sans lui, `--tags java` sur une machine qui
+#    ne declare pas java n'inclurait jamais le role, et ne ferait donc rien.
+- name: Install extras
+  ansible.builtin.include_role:
+    name: "{{ extra }}"
+    apply:
+      tags: ["extras", "{{ extra }}"]
+  loop: >-
+    {{ (extras | default([]))
+       + (extras_available | default([]) | intersect(ansible_run_tags)) }}
+  loop_control:
+    loop_var: extra
+    label: "{{ extra }}"
+  tags: [always]

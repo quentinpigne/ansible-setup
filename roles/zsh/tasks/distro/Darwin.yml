@@ -1,0 +1,9 @@
+---
+# macOS utilise zsh par defaut depuis Catalina : rien a installer.
+- name: Check Zsh is the login shell
+  ansible.builtin.command: dscl . -read /Users/{{ username }} UserShell
+  register: zsh_login_shell
+  changed_when: false
+  check_mode: false
+  failed_when: "'/bin/zsh' not in zsh_login_shell.stdout"
+  tags: [zsh]

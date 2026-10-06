@@ -1,0 +1,6 @@
+---
+context: perso
+
+##
+# L'identite personnelle vient de group_vars/all.yml : elle est le defaut.
+##

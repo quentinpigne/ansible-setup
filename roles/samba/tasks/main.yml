@@ -9,7 +9,7 @@
 - name: Copy samba configuration file
   become: true
   ansible.builtin.template:
-    src: "samba/smb.conf.j2"
+    src: smb.conf.j2
     dest: "/etc/samba/smb.conf"
     mode: "0644"
   tags: samba

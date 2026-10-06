@@ -1,0 +1,6 @@
+---
+# Pas de hostname : sur WSL il est herite de Windows.
+extras:
+  - docker
+  - nvm
+  - rust

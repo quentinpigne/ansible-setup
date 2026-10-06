@@ -1,0 +1,12 @@
+---
+- name: Configure the DNS servers
+  ansible.builtin.include_tasks: "{{ lookup('ansible.builtin.first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_facts.distribution }}.yml"
+        - "{{ distro_family }}.yml"
+      paths:
+        - distro
+  when: network_configuration | default([]) | length > 0
+  tags: [dns, network]

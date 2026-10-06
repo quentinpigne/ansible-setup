@@ -1,8 +1,0 @@
-[mymac]
-localhost
-
-[myserver]
-ubuntu01
-
-[myserver:vars]
-ansible_connection=paramiko

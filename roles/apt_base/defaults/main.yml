@@ -1,0 +1,10 @@
+---
+# Socle de paquets pour toute machine Debian/Ubuntu.
+# Complete par `apt.packages` depuis group_vars/host_vars.
+apt_base_packages:
+  - build-essential
+  - ca-certificates
+  - curl
+  - gnupg
+  - unzip
+apt_base_ppa: []

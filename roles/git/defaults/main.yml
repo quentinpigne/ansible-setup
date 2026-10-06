@@ -1,0 +1,7 @@
+---
+# Reglages appliques sur toutes les machines, en plus de l'identite.
+# Volontairement minimal : le gros de la config git vit dans les dotfiles.
+git_settings:
+  init.defaultBranch: main
+  pull.rebase: "true"
+  push.autoSetupRemote: "true"

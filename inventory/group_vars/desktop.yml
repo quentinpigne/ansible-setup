@@ -1,0 +1,8 @@
+---
+profile: desktop
+
+##
+# Hostname predefini pour les postes de travail.
+# Surchargeable par host_vars pour une machine qui sortirait du moule.
+##
+hostname: "{{ (os == 'mac') | ternary('MacBook-Quentin', 'Linux-Quentin') }}"

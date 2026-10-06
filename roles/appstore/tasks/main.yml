@@ -1,15 +1,20 @@
 ---
-- name: Signs in to App Store
-  ansible.builtin.pause:
-    prompt: Press Ctrl+C to quit now if you have not already signed in to App Store
-    seconds: "{{ appstore_pause }}"
-  tags: appstore
+# Tout le role est inutile sans applications declarees : sans ce garde-fou,
+# la pause de 60 secondes ralentissait chaque execution pour rien.
+- name: Install App Store applications
+  when: appstore.applications | default([]) | length > 0
+  tags: [appstore]
+  block:
+    - name: Sign in to the App Store
+      ansible.builtin.pause:
+        prompt: Press Ctrl+C to quit now if you have not already signed in to App Store
+        seconds: "{{ appstore_pause }}"
 
-- name: Installs mas-cli with Homebrew
-  community.general.homebrew:
-    name: "{{ appstore_mas_package }}"
-  tags: appstore, mas-cli
+    - name: Install mas-cli with Homebrew
+      community.general.homebrew:
+        name: "{{ appstore_mas_package }}"
+        state: present
 
-- name: Install applications
-  ansible.builtin.include_tasks: install.yml
-  loop: "{{ appstore.applications }}"
+    - name: Install the applications
+      ansible.builtin.include_tasks: install.yml
+      loop: "{{ appstore.applications }}"

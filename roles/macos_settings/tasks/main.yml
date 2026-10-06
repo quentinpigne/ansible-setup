@@ -23,10 +23,6 @@
   ansible.builtin.include_tasks: configure_textedit.yml
   tags: textedit
 
-- name: Setup Network
-  ansible.builtin.include_tasks: configure_network.yml
-  tags: network
-
 - name: Setup others
   ansible.builtin.include_tasks: configure_others.yml
   tags: others

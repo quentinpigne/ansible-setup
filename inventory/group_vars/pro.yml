@@ -1,0 +1,13 @@
+---
+context: pro
+
+##
+# Identite professionnelle.
+#
+# Attachee au contexte, pas a une machine : changer d'employeur se fait ici,
+# en une ligne, sans toucher a l'inventaire. Cote dotfiles, le profil chezmoi
+# `work` derive la meme adresse depuis son propre template.
+##
+git:
+  username: Quentin Pigné
+  email: quentin.pigne@kaizen-solutions.net

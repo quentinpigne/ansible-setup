@@ -1,13 +1,15 @@
 ---
-- name: Check for .oh-my-zsh exists
-  ansible.builtin.stat:
-    path: /{{ (ansible_facts.os_family == 'Darwin')|ternary('Users', 'home') }}/{{ username }}/.oh-my-zsh
-  register: ohmyzsh_folder
-  tags: oh-my-zsh
-
+# `creates` remplace le couple stat + changed_when: true, qui rapportait
+# systematiquement "changed". --unattended / RUNZSH / CHSH evitent que le
+# script tente de lancer un shell interactif ou de faire un chsh.
 - name: Install Oh My Zsh
-  ansible.builtin.shell: |
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-  when: not ohmyzsh_folder.stat.exists
-  changed_when: true
-  tags: oh-my-zsh
+  ansible.builtin.shell:
+    cmd: >-
+      sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+      -- --unattended --keep-zshrc
+    creates: "{{ user_home }}/.oh-my-zsh"
+  environment:
+    RUNZSH: "no"
+    CHSH: "no"
+    KEEP_ZSHRC: "yes"
+  tags: [zsh, oh-my-zsh]

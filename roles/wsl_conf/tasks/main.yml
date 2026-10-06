@@ -1,0 +1,18 @@
+---
+# systemd n'est volontairement pas gere ici : les images Ubuntu recentes du
+# Microsoft Store livrent deja `[boot] systemd=true`. Les roles qui en
+# dependent le verifient par un assert (cf. role docker).
+#
+# Le hostname n'est pas gere non plus : sur WSL il est herite de Windows, et
+# c'est le comportement voulu. Le profil wsl ne contient pas le role hostname.
+- name: Configure resolv.conf generation in wsl.conf
+  become: true
+  community.general.ini_file:
+    path: /etc/wsl.conf
+    section: network
+    option: generateResolvConf
+    value: "{{ wsl.generate_resolv_conf | default(true) | ternary('true', 'false') }}"
+    no_extra_spaces: true
+    mode: "0644"
+  notify: WSL shutdown required
+  tags: [wsl, dns]

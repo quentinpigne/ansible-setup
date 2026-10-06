@@ -1,0 +1,32 @@
+---
+- name: Load the package names for this distribution
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution }}.yml"
+        - "{{ distro_family }}.yml"
+      paths:
+        - "{{ role_path }}/vars/distro"
+  tags: [core, tools]
+
+# Garde-fou : un outil ajoute a core_tools sans nom de paquet pour une
+# plateforme echoue ici, explicitement, plutot qu'au milieu de l'install.
+- name: Ensure every core tool has a package name for this distribution
+  ansible.builtin.assert:
+    that: core_tools | difference(core_tools_package_names.keys() | list) | length == 0
+    fail_msg: >-
+      Aucun nom de paquet defini pour {{ distro_family }} :
+      {{ core_tools | difference(core_tools_package_names.keys() | list) | join(', ') }}.
+      Completer roles/core_tools/vars/distro/.
+  tags: [core, tools]
+
+- name: Install the core tools
+  ansible.builtin.include_tasks: "{{ lookup('ansible.builtin.first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_facts.distribution }}.yml"
+        - "{{ distro_family }}.yml"
+      paths:
+        - distro
+  tags: [core, tools]

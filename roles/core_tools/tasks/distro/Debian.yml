@@ -1,0 +1,16 @@
+---
+- name: Add the repositories required by the core tools
+  become: true
+  ansible.builtin.apt_repository:
+    repo: "{{ item }}"
+    state: present
+  loop: "{{ core_tools_repositories | default([]) }}"
+  tags: [core, tools]
+
+- name: Install the core tools with APT
+  become: true
+  ansible.builtin.apt:
+    name: "{{ core_tools | map('extract', core_tools_package_names) | list }}"
+    state: present
+    cache_valid_time: 3600
+  tags: [core, tools]

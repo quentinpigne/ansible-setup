@@ -1,0 +1,15 @@
+---
+core_tools_package_names:
+  ansible: ansible
+  bat: bat
+  eza: eza
+  fd: fd
+  fzf: fzf
+  git: git
+  git-lfs: git-lfs
+  htop: htop
+  jq: jq
+  mc: midnight-commander
+  neovim: neovim
+  ripgrep: ripgrep
+  tree: tree

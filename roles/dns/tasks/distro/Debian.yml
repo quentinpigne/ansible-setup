@@ -1,0 +1,42 @@
+---
+# Un drop-in systemd-resolved est persistant et idempotent, contrairement a
+# `resolvectl dns` qui ne survit pas au redemarrage.
+- name: Check that systemd-resolved is available
+  ansible.builtin.stat:
+    path: /run/systemd/resolve
+  register: dns_resolved
+  tags: [dns, network]
+
+- name: Warn when systemd-resolved is not running
+  ansible.builtin.debug:
+    msg: >-
+      systemd-resolved ne tourne pas sur cet hote : la configuration DNS est
+      ignoree. Sur WSL, /etc/resolv.conf est regenere a chaque demarrage tant
+      que `generateResolvConf` n'est pas passe a false dans /etc/wsl.conf.
+  when: not dns_resolved.stat.exists
+  tags: [dns, network]
+
+- name: Create the systemd-resolved drop-in directory
+  become: true
+  ansible.builtin.file:
+    path: /etc/systemd/resolved.conf.d
+    state: directory
+    mode: "0755"
+  when: dns_resolved.stat.exists
+  tags: [dns, network]
+
+# Les interfaces ne sont pas distinguees ici : systemd-resolved applique ces
+# serveurs globalement, ce qui est le comportement voulu sur ces machines.
+- name: Configure the DNS servers
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/systemd/resolved.conf.d/99-ansible-dns.conf
+    mode: "0644"
+    content: |
+      # Genere par Ansible (role dns) -- ne pas editer a la main.
+      [Resolve]
+      DNS={{ network_configuration | map(attribute='dns_servers') | flatten | unique | join(' ') }}
+      Domains=~.
+  when: dns_resolved.stat.exists
+  notify: Restart systemd-resolved
+  tags: [dns, network]

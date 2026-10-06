@@ -1,0 +1,22 @@
+---
+##
+# Installations optionnelles installees par defaut sur cette machine.
+# Les langages n'y figurent pas volontairement : ils s'installent a la
+# demande, un tag chacun (`--tags java`, `--tags rust`, ...).
+# Catalogue complet : `extras_available` dans group_vars/all.yml
+##
+extras:
+  - docker
+
+##
+# Langues activees dans les dotfiles (chezmoi).
+#
+# Declarees explicitement : `extras` ne contient plus les langages depuis
+# qu'ils s'installent par tag, et chezmoi fige cette valeur a la premiere
+# initialisation (promptMultichoiceOnce).
+##
+dotfiles_langs:
+  - java
+  - python
+  - go
+  - rust

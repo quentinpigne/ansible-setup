@@ -1,0 +1,11 @@
+---
+# Outils client uniquement. Homebrew n'installe pas de daemon : il faut encore
+# un runtime (Docker Desktop, Colima ou OrbStack) pour que `docker run` marche.
+- name: Install the Docker client tools with Homebrew
+  community.general.homebrew:
+    name:
+      - docker
+      - docker-compose
+      - docker-completion
+    state: present
+  tags: [docker]

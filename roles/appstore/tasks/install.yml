@@ -1,12 +1,14 @@
 ---
-- name: Install applications with App Store
+# `find()` renvoie -1 quand le motif est absent : la comparaison a 1 d'origine
+# etait fausse et rapportait 'changed' a chaque execution.
+- name: Install the application with the App Store
   ansible.builtin.command: "mas install {{ item }}"
-  register: result
-  changed_when: result.stdout.find('Installed') != 1
-  tags: appstore
+  register: mas_install
+  changed_when: "'Installed' in mas_install.stdout"
+  tags: [appstore]
 
-- name: Update applications with App Store
+- name: Upgrade the application with the App Store
   ansible.builtin.command: "mas upgrade {{ item }}"
-  register: result
-  changed_when: result.stdout.find('Installed') != 1
-  tags: appstore
+  register: mas_upgrade
+  changed_when: "'Installed' in mas_upgrade.stdout"
+  tags: [appstore]

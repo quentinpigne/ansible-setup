@@ -1,26 +1,57 @@
 ---
-- name: Check hostname
-  ansible.builtin.command: hostname
-  register: current_hostname
-  changed_when: false
-  tags: hostname
+# Trois comportements selon le profil :
+#   desktop  -- nom predefini dans group_vars/desktop.yml
+#   server   -- demande a la premiere configuration, puis fige en host_vars
+#   wsl      -- ce role n'est pas joue du tout (nom herite de Windows)
+- name: Ask for the hostname
+  ansible.builtin.pause:
+    prompt: |
+      Aucun hostname defini pour {{ inventory_hostname }}.
+      Saisir le nom de la machine (Ctrl-C puis A pour abandonner)
+  register: hostname_answer
+  when:
+    - hostname | default('') | length == 0
+    - hostname_ask | bool
+  tags: [hostname]
 
-- name: Set computer name
-  ansible.builtin.command: scutil --set {{ item }} {{ hostname }}
-  with_items:
-    - HostName
-    - LocalHostName
-    - ComputerName
-  notify: Flush DNS cache
-  become: true
-  when: current_hostname.stdout != hostname
-  changed_when: current_hostname.stdout != hostname
-  tags: hostname
+- name: Use the answered hostname
+  ansible.builtin.set_fact:
+    hostname: "{{ hostname_answer.user_input | trim }}"
+  when:
+    - hostname_answer.user_input is defined
+    - hostname_answer.user_input | trim | length > 0
+  tags: [hostname]
 
-- name: Update NetBIOS name
-  community.general.osx_defaults:
-    domain: com.apple.smb.server
-    key: NetBIOSName
-    type: string
-    value: "{{ hostname }}"
-  tags: hostname
+- name: Ensure a hostname is defined
+  ansible.builtin.assert:
+    that: hostname | default('') | length > 0
+    fail_msg: >-
+      Aucun hostname pour {{ inventory_hostname }}. Le declarer dans
+      inventory/host_vars/{{ inventory_hostname }}.yml, ou relancer en
+      interactif pour qu'il soit demande.
+    success_msg: "Hostname : {{ hostname | default('?') }}"
+  tags: [hostname]
+
+- name: Set the hostname
+  ansible.builtin.include_tasks: "{{ lookup('ansible.builtin.first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_facts.distribution }}.yml"
+        - "{{ distro_family }}.yml"
+      paths:
+        - distro
+  tags: [hostname]
+
+# Sans ca le nom serait redemande a chaque execution.
+- name: Persist the answered hostname in host_vars
+  delegate_to: localhost
+  become: false
+  ansible.builtin.lineinfile:
+    path: "{{ inventory_dir }}/host_vars/{{ inventory_hostname }}.yml"
+    line: "hostname: {{ hostname }}"
+    regexp: '^hostname:'
+    create: true
+    mode: "0644"
+  when: hostname_answer.user_input is defined
+  tags: [hostname]

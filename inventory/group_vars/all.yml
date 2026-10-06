@@ -1,0 +1,150 @@
+---
+##
+# Commons
+##
+username: quentin
+
+##
+# Git identity (surchargeable par host_vars pour une machine pro)
+##
+git:
+  username: Quentin Pigné
+  email: quentin.pigne@gmail.com
+
+##
+# Distribution
+#
+# Inferee des facts Ansible (os_family). Surchargeable dans host_vars pour une
+# distro dont Ansible ne devine pas correctement la famille. Le role
+# distro_check valide la valeur et, a defaut, la demande.
+##
+distro_family: "{{ ansible_facts.os_family }}"
+distro_supported:
+  - Darwin
+  - Debian
+
+##
+# Outils installes sur TOUTES les machines, quelle que soit la plateforme.
+#
+# Ce sont des noms canoniques, pas des noms de paquets : la traduction par
+# distribution se fait dans roles/core_tools/vars/distro/.
+# Tout ce qui est specifique a une machine reste dans son group_vars
+# (homebrew.formulae, apt.packages) ou dans un extra.
+##
+core_tools:
+  - ansible
+  - bat
+  - eza
+  - fd
+  - fzf
+  - git
+  - git-lfs
+  - htop
+  - jq
+  - mc
+  - neovim
+  - ripgrep
+  - tree
+
+##
+# DNS (Cloudflare avec filtrage malware)
+#
+# Applique uniquement aux machines perso (`context: perso`). Volontairement
+# absent des machines pro, ou la resolution interne passe par les DNS de
+# l'entreprise.
+#
+# Sur macOS, `interface_name` doit correspondre a un service reseau existant
+# (`networksetup -listallnetworkservices`). Sur Linux, les serveurs sont
+# appliques globalement par systemd-resolved.
+##
+network_configuration:
+  - interface_name: Wi-Fi
+    dns_servers:
+      - 1.1.1.2
+      - 1.0.0.2
+      - 2606:4700:4700::1112
+      - 2606:4700:4700::1001
+
+##
+# Composition de la configuration de base.
+#
+# La base n'est pas un bloc monolithique : c'est une liste de roles, assemblee
+# a partir des trois axes de la machine. Elle est donc inspectable
+# (`ansible-inventory --host <hote>`) et surtout filtrable machine par machine.
+#
+# L'ORDRE COMPTE :
+#   1. le profil pose l'identite et les acces ;
+#   2. l'OS installe le socle logiciel ;
+#   3. la personnalisation depose identite Git, shell et dotfiles ;
+#   4. le contexte applique la politique.
+##
+base_roles_by_profile:
+  desktop:
+    - hostname
+  server:
+    - hostname
+    - ssh            # avant dotfiles : le depot dotfiles se clone en SSH
+  wsl:
+    - wsl_conf       # ni hostname (herite de Windows) ni ssh (pas de sshd)
+
+base_roles_by_os:
+  mac:
+    - preflight
+    - homebrew
+    - appstore
+    - core_tools
+    - iterm2
+    - macos_settings
+  linux:
+    - apt_base
+    - core_tools
+
+base_roles_personal:
+  - git              # l'identite ; le binaire git vient de core_tools
+  - zsh              # avant dotfiles : oh-my-zsh ecrit un .zshrc que chezmoi remplace
+  - dotfiles
+  - fonts
+
+base_roles_by_context:
+  perso:
+    - dns            # DNS Cloudflare avec filtrage malware
+  pro: []            # la politique d'entreprise s'applique, on n'y touche pas
+
+base_roles: >-
+  {{ (base_roles_by_profile[profile] | default([]))
+     + (base_roles_by_os[os] | default([]))
+     + base_roles_personal
+     + (base_roles_by_context[context] | default([])) }}
+
+##
+# Exclusions.
+#
+# Retire des roles de la base pour CETTE machine. Declaratif et persistant,
+# contrairement a `--skip-tags` qu'il faudrait repasser a chaque execution.
+#
+#   base_skip: [dotfiles, git, fonts]   une VM qu'on equipe sans s'y installer
+#   base_skip: [macos_settings]         un Mac dont on ne veut pas toucher l'UI
+#
+# `reject` preserve l'ordre de la liste, contrairement au filtre `difference`.
+##
+base_skip: []
+
+##
+# Catalogue des installations optionnelles.
+#
+# Un role par entree, joignable par son propre tag. Rien ici n'est installe
+# par defaut : seules les entrees listees dans `extras` (host_vars) le sont.
+# Les autres restent disponibles a la demande : `--tags java`.
+##
+extras_available:
+  # Langages
+  - java
+  - node          # version unique, par le gestionnaire de paquets
+  - nvm           # plusieurs versions de Node en parallele
+  - python
+  - rust
+  - go
+  # Outils
+  - docker
+  - kubernetes
+  - samba

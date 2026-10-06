@@ -1,0 +1,62 @@
+---
+# Configuration de base, composee a l'execution d'apres les trois axes de la
+# machine puis filtree par ses exclusions. La liste se lit avec
+# `ansible-inventory --host <hote>` (variable `base_roles`).
+#
+# `include_role` est dynamique : c'est ce qui permet de resoudre les noms de
+# roles d'apres les variables de l'hote. La section `roles:` d'un playbook,
+# elle, est resolue au parsing et n'en serait pas capable.
+
+# Une machine doit appartenir a un groupe de CHACUN des trois axes. Sans ce
+# controle, l'oubli d'un axe produit une erreur Jinja brute
+# (`'profile' is undefined`) qui n'indique pas quoi corriger.
+- name: Ensure the machine declares its three axes
+  ansible.builtin.assert:
+    that:
+      - context is defined
+      - profile is defined
+      - os is defined
+    fail_msg: >-
+      {{ inventory_hostname }} n'est pas completement declare dans l'inventaire.
+      Axes manquants : {{
+        ((['contexte'] if context is not defined else [])
+         + (['profil'] if profile is not defined else [])
+         + (['OS'] if os is not defined else [])) | join(', ') }}.
+      Chaque machine doit appartenir a un groupe de chaque axe :
+      contexte (perso | pro), profil (desktop | server | wsl), OS (mac | linux).
+    success_msg: >-
+      {{ inventory_hostname }} : {{ context | default('?') }} /
+      {{ profile | default('?') }} / {{ os | default('?') }}
+  tags: [always]
+
+# Une exclusion qui ne correspond a aucun role de la base est presque toujours
+# une faute de frappe : elle passerait sinon totalement inapercue.
+- name: Ensure the exclusions match actual base roles
+  ansible.builtin.assert:
+    that: base_skip | reject('in', base_roles) | list | length == 0
+    fail_msg: >-
+      base_skip contient des roles absents de la base de {{ inventory_hostname }} :
+      {{ base_skip | reject('in', base_roles) | list | join(', ') }}.
+      Base de cette machine : {{ base_roles | join(', ') }}.
+    success_msg: "Exclusions : {{ base_skip | join(', ') | default('aucune', true) }}"
+  tags: [always]
+
+- name: Validate the distribution
+  ansible.builtin.include_role:
+    name: distro_check
+    apply:
+      tags: [base]
+  tags: [always]
+
+# `reject` preserve l'ordre des roles, contrairement au filtre `difference` :
+# zsh doit passer avant dotfiles, core_tools avant git.
+- name: Apply the base configuration
+  ansible.builtin.include_role:
+    name: "{{ base_role }}"
+    apply:
+      tags: [base, "{{ base_role }}"]
+  loop: "{{ base_roles | reject('in', base_skip) | list }}"
+  loop_control:
+    loop_var: base_role
+    label: "{{ base_role }}"
+  tags: [always]
