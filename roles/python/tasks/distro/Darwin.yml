@@ -1,0 +1,8 @@
+---
+- name: Install Python and uv with Homebrew
+  community.general.homebrew:
+    name:
+      - "{{ python_brew_formula }}"
+      - uv
+    state: present
+  tags: [python]

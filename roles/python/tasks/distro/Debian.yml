@@ -1,0 +1,21 @@
+---
+# Python3 est fourni par la distro et suffisamment recent -> paquet natif.
+- name: Install Python with APT
+  become: true
+  ansible.builtin.apt:
+    name:
+      - python3
+      - python3-pip
+      - python3-venv
+    state: present
+    cache_valid_time: 3600
+  tags: [python]
+
+# uv n'est pas dans les depots Ubuntu -> installeur officiel Astral.
+- name: Install uv
+  ansible.builtin.shell:
+    cmd: curl -LsSf https://astral.sh/uv/install.sh | sh
+    creates: "{{ user_home }}/.local/bin/uv"
+  environment:
+    UV_NO_MODIFY_PATH: "1"
+  tags: [python]

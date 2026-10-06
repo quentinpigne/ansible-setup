@@ -1,0 +1,11 @@
+---
+- name: Install python
+  ansible.builtin.include_tasks: "{{ lookup('ansible.builtin.first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_facts.distribution }}.yml"
+        - "{{ distro_family }}.yml"
+      paths:
+        - distro
+  tags: [python]

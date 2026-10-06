@@ -1,0 +1,7 @@
+---
+# Disponible et a jour dans Homebrew -> paquet natif.
+- name: Install Rust with Homebrew
+  community.general.homebrew:
+    name: rust
+    state: present
+  tags: [rust]

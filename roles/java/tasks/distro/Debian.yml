@@ -1,0 +1,8 @@
+---
+- name: Install the latest JDK and the build tools with APT
+  become: true
+  ansible.builtin.apt:
+    name: "{{ [java_apt_jdk] + java_build_tools }}"
+    state: present
+    cache_valid_time: 3600
+  tags: [java]

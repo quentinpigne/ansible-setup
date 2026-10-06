@@ -1,0 +1,10 @@
+---
+# Version de nvm lui-meme (pas de Node).
+# Derniere release : https://github.com/nvm-sh/nvm/releases
+nvm_version: v0.40.7
+
+nvm_dir: "{{ user_home }}/.nvm"
+
+# Version de Node installee. `node` est l'alias nvm de la derniere version ;
+# une version precise (`22`, `v22.11.0`) fige l'installation.
+nvm_node_version: node

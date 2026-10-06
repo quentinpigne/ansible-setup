@@ -1,0 +1,11 @@
+---
+# Derniere JDK disponible.
+# macOS : la formule `openjdk` suit toujours la derniere version.
+# Linux : la version doit etre nommee explicitement, `default-jdk` pointant
+# sur le choix de la distribution, qui est souvent en retard.
+java_apt_jdk: openjdk-21-jdk
+
+# Outils de build de l'ecosysteme, installes avec la JDK.
+java_build_tools:
+  - maven
+  - gradle

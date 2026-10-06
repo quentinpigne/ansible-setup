@@ -1,0 +1,46 @@
+---
+# nvm gere plusieurs versions de Node en parallele, contrairement a l'extra
+# `node` qui installe une version unique par le gestionnaire de paquets.
+# Les deux s'excluent en pratique : choisir l'un ou l'autre par machine.
+#
+# nvm est une fonction shell, pas un binaire : chaque tache doit sourcer
+# nvm.sh, et tourner sous bash (le script n'est pas compatible sh).
+- name: Install nvm
+  ansible.builtin.shell:
+    cmd: >-
+      curl -o- -fsSL
+      https://raw.githubusercontent.com/nvm-sh/nvm/{{ nvm_version }}/install.sh | bash
+    creates: "{{ nvm_dir }}/nvm.sh"
+  environment:
+    NVM_DIR: "{{ nvm_dir }}"
+    # Sans ca, l'installeur ajoute son bloc d'initialisation au .zshrc, qui
+    # est gere par chezmoi. L'integration shell vient des dotfiles (plugin
+    # oh-my-zsh nvm), pas de l'installeur.
+    PROFILE: /dev/null
+  tags: [nvm]
+
+# La comparaison se fait dans le shell : `nvm current` renvoie `system` quand
+# aucune version n'est installee, et la version active sinon.
+- name: Check whether Node needs installing
+  ansible.builtin.shell:
+    cmd: |
+      . "{{ nvm_dir }}/nvm.sh"
+      current=$(nvm current 2>/dev/null || echo none)
+      wanted=$(nvm version-remote {{ nvm_node_version }} 2>/dev/null || echo unknown)
+      if [ "$current" = "$wanted" ]; then echo uptodate; else echo "install $current $wanted"; fi
+    executable: /bin/bash
+  register: nvm_state
+  changed_when: false
+  check_mode: false
+  failed_when: false
+  tags: [nvm]
+
+- name: Install Node with nvm
+  ansible.builtin.shell:
+    cmd: |
+      . "{{ nvm_dir }}/nvm.sh"
+      nvm install {{ nvm_node_version }}
+      nvm alias default {{ nvm_node_version }}
+    executable: /bin/bash
+  when: nvm_state.stdout | default('') is search('^install')
+  tags: [nvm]

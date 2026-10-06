@@ -1,0 +1,28 @@
+---
+# `golang-go` existe dans apt mais reste en retard -> archive officielle go.dev.
+- name: Check the installed Go version
+  ansible.builtin.command: /usr/local/go/bin/go version
+  register: go_installed
+  changed_when: false
+  check_mode: false
+  failed_when: false
+  tags: [go]
+
+- name: Remove the previous Go installation
+  become: true
+  ansible.builtin.file:
+    path: /usr/local/go
+    state: absent
+  when: go_version not in (go_installed.stdout | default(''))
+  tags: [go]
+
+- name: Install Go from the official archive
+  become: true
+  ansible.builtin.unarchive:
+    src: "https://go.dev/dl/go{{ go_version }}.linux-amd64.tar.gz"
+    dest: /usr/local
+    remote_src: true
+    owner: root
+    group: root
+  when: go_version not in (go_installed.stdout | default(''))
+  tags: [go]

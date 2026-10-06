@@ -1,0 +1,36 @@
+---
+# `nodejs` existe dans apt mais avec plusieurs versions majeures de retard
+# (18.x sur Ubuntu 24.04, 12.x sur 22.04) -> depot officiel NodeSource.
+- name: Create the APT keyrings directory
+  become: true
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+  tags: [node]
+
+- name: Add the NodeSource GPG key
+  become: true
+  ansible.builtin.get_url:
+    url: https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
+    dest: /etc/apt/keyrings/nodesource.asc
+    mode: "0644"
+  tags: [node]
+
+- name: Add the NodeSource repository
+  become: true
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [signed-by=/etc/apt/keyrings/nodesource.asc]
+      https://deb.nodesource.com/node_{{ node_major_version }}.x nodistro main
+    filename: nodesource
+    state: present
+  tags: [node]
+
+- name: Install Node.js
+  become: true
+  ansible.builtin.apt:
+    name: nodejs
+    state: present
+    update_cache: true
+  tags: [node]

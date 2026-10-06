@@ -1,0 +1,16 @@
+---
+- name: Install the latest JDK and the build tools with Homebrew
+  community.general.homebrew:
+    name: "{{ ['openjdk'] + java_build_tools }}"
+    state: present
+  tags: [java]
+
+# Sans ce lien, /usr/libexec/java_home ne voit pas le JDK de Homebrew.
+- name: Link the Homebrew JDK for system discovery
+  become: true
+  ansible.builtin.file:
+    src: "{{ homebrew_prefix }}/opt/openjdk/libexec/openjdk.jdk"
+    dest: /Library/Java/JavaVirtualMachines/openjdk.jdk
+    state: link
+    force: true
+  tags: [java]

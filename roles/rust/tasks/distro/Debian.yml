@@ -1,0 +1,11 @@
+---
+# apt fournit `rustc`, mais avec plusieurs versions majeures de retard
+# -> fallback sur rustup, l'installeur officiel.
+# Pas de become : rustup s'installe dans le home de l'utilisateur.
+- name: Install Rust with rustup
+  ansible.builtin.shell:
+    cmd: >-
+      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs
+      | sh -s -- -y --no-modify-path
+    creates: "{{ user_home }}/.cargo/bin/rustc"
+  tags: [rust]

@@ -1,0 +1,5 @@
+---
+node_major_version: "22"
+node_global_packages:
+  - pnpm
+  - yarn

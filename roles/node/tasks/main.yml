@@ -1,0 +1,19 @@
+---
+- name: Install Node.js
+  ansible.builtin.include_tasks: "{{ lookup('ansible.builtin.first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_facts.distribution }}.yml"
+        - "{{ distro_family }}.yml"
+      paths:
+        - distro
+  tags: [node]
+
+- name: Install the global NPM packages
+  community.general.npm:
+    name: "{{ item }}"
+    global: true
+    state: present
+  loop: "{{ node_global_packages }}"
+  tags: [node, npm]

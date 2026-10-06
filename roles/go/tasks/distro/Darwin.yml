@@ -1,0 +1,6 @@
+---
+- name: Install Go with Homebrew
+  community.general.homebrew:
+    name: go
+    state: present
+  tags: [go]
