@@ -1,0 +1,36 @@
+---
+# Aucun paquet Nerd Font dans les depots Debian/Ubuntu : `fonts-firacode`
+# existe mais ne fournit que la police d'origine, sans les glyphes patches.
+# -> fallback sur les archives officielles du projet nerd-fonts.
+- name: Create the user fonts directory
+  ansible.builtin.file:
+    path: "{{ user_home }}/.local/share/fonts/{{ item }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ fonts_nerd_archives }}"
+  tags: [fonts]
+
+# `creates` rend la tache idempotente : l'archive n'est retelechargee que si
+# le repertoire de destination a ete vide, ou la version changee.
+- name: Install the Nerd Fonts from the official release
+  ansible.builtin.unarchive:
+    src: >-
+      https://github.com/ryanoasis/nerd-fonts/releases/download/v{{ fonts_nerd_version }}/{{ item }}.zip
+    dest: "{{ user_home }}/.local/share/fonts/{{ item }}"
+    remote_src: true
+    creates: "{{ user_home }}/.local/share/fonts/{{ item }}/.installed-{{ fonts_nerd_version }}"
+    exclude:
+      - README.md
+      - LICENSE
+  loop: "{{ fonts_nerd_archives }}"
+  notify: Rebuild the font cache
+  tags: [fonts]
+
+- name: Mark the installed Nerd Fonts version
+  ansible.builtin.file:
+    path: "{{ user_home }}/.local/share/fonts/{{ item }}/.installed-{{ fonts_nerd_version }}"
+    state: touch
+    mode: "0644"
+  loop: "{{ fonts_nerd_archives }}"
+  changed_when: false
+  tags: [fonts]

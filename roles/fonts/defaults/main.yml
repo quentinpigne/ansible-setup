@@ -1,0 +1,13 @@
+---
+# Version Nerd Fonts utilisee pour le fallback Linux.
+# A garder alignee avec le cask Homebrew (`brew info --cask font-fira-code-nerd-font`)
+# pour avoir la meme police sur toutes les machines.
+fonts_nerd_version: "3.5.1"
+
+# Archives Nerd Fonts a installer (nom du zip, sans extension).
+fonts_nerd_archives:
+  - FiraCode
+
+# Cask Homebrew equivalent, pour macOS.
+fonts_brew_casks:
+  - font-fira-code-nerd-font

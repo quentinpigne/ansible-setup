@@ -1,0 +1,5 @@
+---
+# Sans ca les polices copiees ne sont pas vues par les applications.
+- name: Rebuild the font cache
+  ansible.builtin.command: fc-cache -f "{{ user_home }}/.local/share/fonts"
+  changed_when: true

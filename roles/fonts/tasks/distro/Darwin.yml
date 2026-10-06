@@ -1,0 +1,8 @@
+---
+# Le cask existe et est maintenu (homebrew/cask) -> paquet natif,
+# mis a jour par `brew upgrade` comme le reste.
+- name: Install the Nerd Fonts with Homebrew
+  community.general.homebrew_cask:
+    name: "{{ fonts_brew_casks }}"
+    state: present
+  tags: [fonts]
