@@ -1,0 +1,6 @@
+.DS_Store
+*.retry
+
+# Valeurs locales / secrets, jamais committees (proxy, CA d'entreprise, ...)
+*.local.yml
+.vault_pass
