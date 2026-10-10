@@ -13,29 +13,40 @@
       `wsl --shutdown` depuis Windows.
   tags: [docker]
 
-- name: Make sure ca-certificates, curl and gnupg are installed
+# python3-debian est requis par le module deb822_repository.
+- name: Make sure ca-certificates, curl and python3-debian are installed
   become: true
   ansible.builtin.apt:
     pkg:
     - ca-certificates
     - curl
-    - gnupg
+    - python3-debian
     update_cache: yes
   tags: docker
 
-- name: Adding official Docker GPG apt Key
+# apt-key n'existe plus depuis Ubuntu 26.04 : le depot est declare au format
+# deb822, avec sa cle en Signed-By, comme le recommande la doc Docker.
+# L'ancien docker.list doit disparaitre : deux sources Docker aux Signed-By
+# differents feraient echouer apt.
+- name: Remove the legacy Docker repository and key
   become: true
-  ansible.builtin.apt_key:
-    url: https://download.docker.com/linux/ubuntu/gpg
-    keyring: /etc/apt/trusted.gpg.d/docker.gpg
-    state: present
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/apt/sources.list.d/docker.list
+    - /etc/apt/trusted.gpg.d/docker.gpg
   tags: docker
 
 - name: Adding Docker repository
   become: true
-  ansible.builtin.apt_repository:
-    repo: "deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
-    filename: docker.list
+  ansible.builtin.deb822_repository:
+    name: docker
+    types: deb
+    uris: "https://download.docker.com/linux/{{ ansible_facts.distribution | lower }}"
+    suites: "{{ ansible_facts.distribution_release }}"
+    components: stable
+    signed_by: "https://download.docker.com/linux/{{ ansible_facts.distribution | lower }}/gpg"
     state: present
   tags: docker
 
