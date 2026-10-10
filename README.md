@@ -376,6 +376,12 @@ Le playbook se joue **depuis l'interieur de la distro**. Toute modification de
 `/etc/wsl.conf` (hostname, DNS) ne prend effet qu'apres un `wsl --shutdown`
 lance depuis Windows.
 
+Ubuntu 26.04 remplace `sudo` par `sudo-rs`, avec lequel Ansible ne reconnait
+pas la demande de mot de passe : il echoue en *timeout waiting for privilege
+escalation prompt*, meme avec le bon mot de passe. `wsl-kaizen` force donc le
+sudo historique (`ansible_become_exe: sudo.ws`) ; a reprendre pour toute autre
+machine en 26.04.
+
 # Based on
 
 macbook-setup :

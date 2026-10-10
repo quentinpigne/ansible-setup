@@ -1,5 +1,11 @@
 ---
 # Pas de hostname : sur WSL il est herite de Windows.
+
+# Ubuntu 26.04 livre sudo-rs comme `sudo` par defaut. Ansible n'y reconnait
+# pas sa demande de mot de passe et echoue en timeout, meme avec le bon mot de
+# passe. Le sudo historique reste installe sous le nom sudo.ws.
+ansible_become_exe: sudo.ws
+
 extras:
   - docker
   - nvm
