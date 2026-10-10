@@ -301,16 +301,26 @@ Les runs suivants sont idempotents : `chezmoi status` est consulte, et
 `chezmoi apply` n'est lance que s'il y a quelque chose a appliquer.
 `--tags dotfiles-update` tire les derniers commits (jamais joue par defaut).
 
-**Prerequis sur une machine neuve**, a poser a la main avant de lancer Ansible :
+**Prerequis sur une machine neuve :**
 
 | Fichier                        | Pourquoi                                    |
 | ------------------------------ | ------------------------------------------- |
-| `~/.ssh/id_*` (+ GitHub)       | le depot dotfiles est **prive**             |
-| `~/.config/chezmoi/key.txt`    | dechiffre les secrets (`age`), **se recopie** depuis une machine deja configuree -- elle ne se regenere pas |
+| `~/.ssh/id_*` (+ GitHub)       | le depot dotfiles est **prive** -- a poser a la main |
+| `~/.config/chezmoi/key.txt`    | dechiffre les secrets (`age`) ; elle ne se regenere pas, elle se **recopie** |
 
-Le role verifie les deux : absence de cle SSH -> echec immediat avec la marche
-a suivre ; absence de cle age -> avertissement, les fichiers chiffres ne sont
-simplement pas deployes.
+La cle age est copiee par le role depuis la machine qui lance le playbook
+(`dotfiles_age_key_src`, par defaut son propre `~/.config/chezmoi/key.txt`),
+sans jamais ecraser une cle deja en place. Sur un hote en connexion locale
+comme le WSL, pilote et cible sont la meme machine : indiquer ou la trouver.
+
+```
+./apply.sh -e dotfiles_age_key_src=/mnt/c/Users/<user>/key.txt
+```
+
+Le template chezmoi n'active l'encryption que si la cle existe a l'init : une
+cle arrivee apres coup fait regenerer `chezmoi.toml`. Sans cle, les fichiers
+chiffres sont exclus (`--exclude=encrypted`) avec un avertissement. Absence de
+cle SSH -> echec immediat avec la marche a suivre.
 
 Pour configurer une machine sans les dotfiles en attendant :
 `base_skip: [dotfiles]` dans son `host_vars`.

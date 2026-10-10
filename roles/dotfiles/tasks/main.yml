@@ -36,22 +36,46 @@
   when: dotfiles_repo is match('.*@.*:')
   tags: [dotfiles]
 
-# Les secrets du depot sont chiffres avec age. Sans cette cle ils restent
-# illisibles : elle ne se regenere pas, elle se recopie depuis une machine
-# deja configuree.
+# Les secrets du depot sont chiffres avec age. La cle ne se regenere pas :
+# elle est recopiee depuis la machine qui lance le playbook, sans jamais
+# ecraser une cle deja en place. Le test `is file` s'evalue cote pilote.
+- name: Create the chezmoi configuration directory
+  ansible.builtin.file:
+    path: "{{ dotfiles_age_key | dirname }}"
+    state: directory
+    mode: "0700"
+  tags: [dotfiles]
+
+- name: Copy the age encryption key from the control machine
+  ansible.builtin.copy:
+    src: "{{ dotfiles_age_key_src }}"
+    dest: "{{ dotfiles_age_key }}"
+    mode: "0600"
+    force: false
+  when: dotfiles_age_key_src is file
+  tags: [dotfiles]
+
 - name: Check for the age encryption key
   ansible.builtin.stat:
-    path: "{{ user_home }}/.config/chezmoi/key.txt"
-  register: dotfiles_age_key
+    path: "{{ dotfiles_age_key }}"
+  register: dotfiles_age_key_stat
+  tags: [dotfiles]
+
+# Sans cle, les fichiers chiffres sont exclus plutot que de faire echouer
+# chezmoi sur "encryption not configured".
+- name: Exclude encrypted files when the age key is missing
+  ansible.builtin.set_fact:
+    dotfiles_exclude: "{{ '' if dotfiles_age_key_stat.stat.exists else '--exclude=encrypted' }}"
   tags: [dotfiles]
 
 - name: Warn when the age key is missing
   ansible.builtin.debug:
     msg: >-
-      {{ user_home }}/.config/chezmoi/key.txt est absent : les fichiers
-      chiffres ne seront pas deployes. Copier la cle depuis une machine deja
-      configuree (chmod 600), puis relancer --tags dotfiles.
-  when: not dotfiles_age_key.stat.exists
+      {{ dotfiles_age_key }} est absent, et {{ dotfiles_age_key_src }}
+      introuvable sur la machine pilote : les fichiers chiffres ne seront pas
+      deployes. Indiquer ou trouver la cle (-e dotfiles_age_key_src=<chemin>),
+      ou la poser a la main (chmod 600), puis relancer --tags dotfiles.
+  when: not dotfiles_age_key_stat.stat.exists
   tags: [dotfiles]
 
 # `--no-tty` impose de fournir les reponses par flags : sans elles, le
@@ -60,17 +84,36 @@
 - name: Initialise the dotfiles
   ansible.builtin.command:
     cmd: >-
-      {{ chezmoi_bin }} init --apply --no-tty
+      {{ chezmoi_bin }} init --apply --no-tty {{ dotfiles_exclude }}
       --promptChoice profile={{ dotfiles_profile }}
       --promptMultichoice langs={{ dotfiles_langs | join('/') }}
       {{ dotfiles_repo }}
     creates: "{{ dotfiles_source_dir }}"
   tags: [dotfiles, dotfiles-init]
 
+# Le template de configuration n'active l'encryption que si la cle existe au
+# moment de l'init. Une cle arrivee apres coup exige donc de regenerer
+# chezmoi.toml ; les reponses deja enregistrees sont conservees.
+- name: Check whether encryption is configured
+  ansible.builtin.command: grep -q '^encryption' {{ user_home }}/.config/chezmoi/chezmoi.toml
+  register: dotfiles_encryption
+  changed_when: false
+  check_mode: false
+  failed_when: false
+  when: dotfiles_age_key_stat.stat.exists
+  tags: [dotfiles]
+
+- name: Regenerate the chezmoi configuration with encryption
+  ansible.builtin.command: "{{ chezmoi_bin }} init --no-tty"
+  when:
+    - dotfiles_age_key_stat.stat.exists
+    - dotfiles_encryption.rc | default(0) != 0
+  tags: [dotfiles]
+
 # Sur une machine deja initialisee, `status` liste ce qui differe : il rend la
 # tache d'application idempotente et le rapport Ansible honnete.
 - name: Check for pending dotfiles changes
-  ansible.builtin.command: "{{ chezmoi_bin }} status"
+  ansible.builtin.command: "{{ chezmoi_bin }} status {{ dotfiles_exclude }}"
   register: dotfiles_status
   changed_when: false
   check_mode: false
@@ -78,7 +121,7 @@
   tags: [dotfiles]
 
 - name: Apply the dotfiles
-  ansible.builtin.command: "{{ chezmoi_bin }} apply --no-tty"
+  ansible.builtin.command: "{{ chezmoi_bin }} apply --no-tty {{ dotfiles_exclude }}"
   when:
     - dotfiles_status.rc | default(1) == 0
     - dotfiles_status.stdout | default('') | length > 0
@@ -86,6 +129,6 @@
 
 # Non joue par defaut : `--tags dotfiles-update` tire les derniers commits.
 - name: Update the dotfiles from the remote
-  ansible.builtin.command: "{{ chezmoi_bin }} update --no-tty"
+  ansible.builtin.command: "{{ chezmoi_bin }} update --no-tty {{ dotfiles_exclude | default('') }}"
   changed_when: true
   tags: [never, dotfiles-update]

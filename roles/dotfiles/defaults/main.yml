@@ -27,3 +27,12 @@ dotfiles_supported_langs:
 dotfiles_langs: "{{ extras | default([]) | intersect(dotfiles_supported_langs) }}"
 
 dotfiles_source_dir: "{{ user_home }}/.local/share/chezmoi"
+
+# Cle age qui dechiffre les secrets du depot. Elle est copiee depuis la
+# machine qui lance le playbook si la cible ne l'a pas encore.
+#
+# Sur un hote en connexion locale (WSL), pilote et cible sont la meme machine :
+# indiquer ou trouver la cle, par exemple cote Windows :
+#   ./apply.sh -e dotfiles_age_key_src=/mnt/c/Users/<user>/key.txt
+dotfiles_age_key: "{{ user_home }}/.config/chezmoi/key.txt"
+dotfiles_age_key_src: "{{ lookup('ansible.builtin.env', 'HOME') }}/.config/chezmoi/key.txt"
