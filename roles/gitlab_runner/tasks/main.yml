@@ -1,0 +1,14 @@
+---
+# Installation seule : l'enregistrement aupres d'une instance GitLab reste
+# manuel (`sudo gitlab-runner register`), le token n'a pas a transiter par
+# Ansible.
+- name: Install GitLab Runner
+  ansible.builtin.include_tasks: "{{ lookup('ansible.builtin.first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_facts.distribution }}.yml"
+        - "{{ distro_family }}.yml"
+      paths:
+        - distro
+  tags: [gitlab_runner]

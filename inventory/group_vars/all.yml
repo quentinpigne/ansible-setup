@@ -146,5 +146,6 @@ extras_available:
   - go
   # Outils
   - docker
+  - gitlab_runner
   - kubernetes
   - samba

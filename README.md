@@ -241,6 +241,23 @@ Un seul outil, sans rien declarer ni jouer la base :
 
 Seuls les garde-fous (`distro_check`) et le role demande s'executent.
 
+### Runner GitLab
+
+L'extra `gitlab_runner` installe `gitlab-runner` depuis le depot officiel
+GitLab, sans l'enregistrer. Il n'est active sur aucune machine pour l'instant ;
+pour l'utiliser, l'ajouter aux extras de l'hote :
+
+```yaml
+extras: [docker, gitlab_runner]
+```
+
+L'enregistrement reste manuel, avec un token d'authentification (`glrt-`) cree
+dans l'UI GitLab (Settings > CI/CD > Runners > New runner) :
+
+```
+sudo gitlab-runner register --url https://gitlab.com --token glrt-xxx
+```
+
 ### Hostname
 
 Quatre comportements, selon le profil :

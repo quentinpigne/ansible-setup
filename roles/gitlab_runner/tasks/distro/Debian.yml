@@ -1,0 +1,21 @@
+---
+# Le depot officiel GitLab n'est pas declare a la main : son script installe
+# aussi la cle GPG et gere sa rotation, ce qu'un apt_repository fige ne fait
+# pas. `creates` evite de le rejouer.
+- name: Add the official GitLab Runner repository
+  become: true
+  ansible.builtin.shell:
+    cmd: >-
+      curl -fsSL
+      https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh
+      | bash
+    creates: /etc/apt/sources.list.d/runner_gitlab-runner.list
+  tags: [gitlab_runner]
+
+- name: Install GitLab Runner
+  become: true
+  ansible.builtin.apt:
+    name: gitlab-runner
+    state: present
+    update_cache: true
+  tags: [gitlab_runner]
