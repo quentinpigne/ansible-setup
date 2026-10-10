@@ -18,12 +18,29 @@ core_tools_package_names:
   ripgrep: ripgrep
   tree: tree
 
-# Depots necessaires avant installation.
-# Le PPA neovim compense un neovim trop ancien dans les depots Ubuntu. A
-# partir de la 26.04, la version des depots suffit, et le PPA echoue sur
-# "Unable to get required signing key" : il n'est plus ajoute.
+# Depots necessaires avant installation, au format deb822_repository.
+#
+# Le PPA neovim unstable publie un build quotidien de la branche de
+# developpement : les depots Ubuntu sont trop en retard (0.11 en 26.04) pour
+# la config nvim, qui vise 0.12. Il est declare en deb822 avec sa cle en
+# Signed-By : l'ajout par apt_repository echoue sans apt-key (Ubuntu 26.04),
+# sur "Unable to get required signing key".
 core_tools_repositories: >-
-  {{ ['ppa:neovim-ppa/unstable']
-     if ansible_facts.distribution == 'Ubuntu'
-        and ansible_facts.distribution_version is version('26.04', '<')
-     else [] }}
+  {{ [{
+       'name': 'neovim-ppa-unstable',
+       'uris': 'https://ppa.launchpadcontent.net/neovim-ppa/unstable/ubuntu',
+       'suites': ansible_facts.distribution_release,
+       'components': 'main',
+       'signed_by': 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x9DBB0BE9366964F134855E2255F96FCF8231B6DD',
+     }] if ansible_facts.distribution == 'Ubuntu' else [] }}
+
+# Fichiers poses par l'ancien ajout du PPA via apt_repository. Ils doivent
+# disparaitre : deux sources aux Signed-By differents feraient echouer apt.
+core_tools_legacy_sources:
+  - neovim-ppa-ubuntu-unstable-*.list
+  - neovim-ppa-ubuntu-unstable-*.sources
+
+# Outils maintenus a la derniere version disponible a chaque execution, et pas
+# seulement installes s'ils manquent.
+core_tools_latest:
+  - neovim

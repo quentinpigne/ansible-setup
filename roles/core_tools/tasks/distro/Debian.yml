@@ -1,10 +1,55 @@
 ---
+# python3-debian est requis par le module deb822_repository.
+- name: Make sure python3-debian is installed
+  become: true
+  ansible.builtin.apt:
+    name: python3-debian
+    state: present
+    cache_valid_time: 3600
+  when: core_tools_repositories | length > 0
+  tags: [core, tools]
+
+- name: Look for legacy repository files
+  ansible.builtin.find:
+    paths: /etc/apt/sources.list.d
+    patterns: "{{ core_tools_legacy_sources | default([]) }}"
+  register: core_tools_legacy
+  tags: [core, tools]
+
+- name: Remove the legacy repository files
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ core_tools_legacy.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+  tags: [core, tools]
+
 - name: Add the repositories required by the core tools
   become: true
-  ansible.builtin.apt_repository:
-    repo: "{{ item }}"
+  ansible.builtin.deb822_repository:
+    name: "{{ item.name }}"
+    types: deb
+    uris: "{{ item.uris }}"
+    suites: "{{ item.suites }}"
+    components: "{{ item.components }}"
+    signed_by: "{{ item.signed_by }}"
     state: present
   loop: "{{ core_tools_repositories | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: core_tools_repos
+  tags: [core, tools]
+
+# deb822_repository, contrairement a apt_repository, ne rafraichit pas le
+# cache ; cache_valid_time ne suffit pas, le cache venant d'etre rafraichi par
+# apt_base.
+- name: Refresh the APT cache after adding repositories
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+  when: core_tools_repos is changed
   tags: [core, tools]
 
 - name: Install the core tools with APT
@@ -13,4 +58,14 @@
     name: "{{ core_tools | map('extract', core_tools_package_names) | list }}"
     state: present
     cache_valid_time: 3600
+  tags: [core, tools]
+
+# `state: present` laisserait en place une version deja installee, par exemple
+# le neovim des depots Ubuntu installe avant l'ajout du PPA.
+- name: Keep some core tools at their latest version
+  become: true
+  ansible.builtin.apt:
+    name: "{{ core_tools_latest | intersect(core_tools) | map('extract', core_tools_package_names) | list }}"
+    state: latest
+  when: core_tools_latest | default([]) | intersect(core_tools) | length > 0
   tags: [core, tools]
