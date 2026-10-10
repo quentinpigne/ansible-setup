@@ -29,7 +29,8 @@ sous forme de listes, et le role `base` les enchaine :
 base_roles: >-
   {{ (base_roles_by_profile[profile] | default([]))     # hostname, ssh, wsl.conf
      + (base_roles_by_os[os] | default([]))             # paquets, core_tools
-     + base_roles_personal                              # git, zsh, dotfiles, fonts
+     + base_roles_git                                   # git, seulement sans dotfiles
+     + base_roles_personal                              # zsh, dotfiles, fonts
      + (base_roles_by_context[context] | default([])) }}   # DNS, proxy
 
 # roles/base/tasks/main.yml
@@ -45,9 +46,9 @@ Ce qui donne, machine par machine :
 
 ```
 mac-perso    hostname preflight homebrew appstore core_tools iterm2
-             macos_settings git zsh dotfiles fonts dns
-ubuntu01     hostname ssh apt_base core_tools git zsh dotfiles fonts dns
-wsl-kaizen   wsl_conf apt_base core_tools git zsh dotfiles fonts
+             macos_settings zsh dotfiles fonts dns
+ubuntu01     hostname ssh apt_base core_tools zsh dotfiles fonts dns
+wsl-kaizen   wsl_conf apt_base core_tools zsh dotfiles fonts
 ```
 
 L'ordre compte : le profil pose l'identite, l'OS installe, le contexte applique
@@ -180,7 +181,7 @@ a partir des trois axes puis filtree. Elle s'inspecte :
 
 ```sh
 ansible ubuntu01 -m debug -a var=base_roles
-# hostname, ssh, apt_base, core_tools, git, zsh, dotfiles, fonts, dns
+# hostname, ssh, apt_base, core_tools, zsh, dotfiles, fonts, dns
 ```
 
 (`ansible-inventory --host` ne convient pas ici : il affiche le template, pas
@@ -191,7 +192,7 @@ Quatre leviers, du plus durable au plus ponctuel :
 | Besoin                                | Levier                        | Ou                |
 | ------------------------------------- | ----------------------------- | ----------------- |
 | ajouter un outil a une machine        | `extras: [docker, nvm]`       | `host_vars`       |
-| **retirer** un role de la base        | `base_skip: [dotfiles, git]`  | `host_vars`       |
+| **retirer** un role de la base        | `base_skip: [dotfiles, fonts]`| `host_vars`       |
 | installer un seul outil, sans la base | `--tags docker`               | ligne de commande |
 | ecarter un role une seule fois        | `--skip-tags fonts`           | ligne de commande |
 
@@ -213,11 +214,10 @@ Effet mesure sur le Mac :
 
 ```
 base normale   hostname preflight homebrew appstore core_tools iterm2
-               macos_settings git zsh dotfiles fonts dns
+               macos_settings zsh dotfiles fonts dns
 
 base_skip:     hostname preflight homebrew appstore core_tools
-[dotfiles,     zsh fonts dns
- git,
+[dotfiles,     git zsh fonts dns
  macos_settings]
 ```
 
@@ -289,6 +289,11 @@ repondant aux deux questions du template sans interaction :
 | -------------- | ---------------------------- | ----------------------------------- |
 | `profile`      | l'axe **contexte**           | `perso` -> `perso`, `pro` -> `work` |
 | `langs`        | `dotfiles_langs` (host_vars) | java, python, ruby, go, rust        |
+
+`~/.gitconfig`, identite comprise, appartient aux dotfiles : le role `git`
+n'entre dans la base que si `dotfiles` est exclu (`base_skip`), pour poser
+l'identite d'une machine sans dotfiles. Les deux ne doivent pas ecrire le meme
+fichier, chezmoi refuserait ensuite de l'ecraser.
 
 Les deux vocabulaires different volontairement : `pro` cote Ansible, `work`
 cote dotfiles. Le role fait la traduction.

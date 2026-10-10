@@ -75,7 +75,7 @@ network_configuration:
 # L'ORDRE COMPTE :
 #   1. le profil pose l'identite et les acces ;
 #   2. l'OS installe le socle logiciel ;
-#   3. la personnalisation depose identite Git, shell et dotfiles ;
+#   3. la personnalisation depose shell et dotfiles (identite Git comprise) ;
 #   4. le contexte applique la politique.
 ##
 base_roles_by_profile:
@@ -100,7 +100,6 @@ base_roles_by_os:
     - core_tools
 
 base_roles_personal:
-  - git              # l'identite ; le binaire git vient de core_tools
   - zsh              # avant dotfiles : oh-my-zsh ecrit un .zshrc que chezmoi remplace
   - dotfiles
   - fonts
@@ -110,9 +109,15 @@ base_roles_by_context:
     - dns            # DNS Cloudflare avec filtrage malware
   pro: []            # la politique d'entreprise s'applique, on n'y touche pas
 
+# ~/.gitconfig appartient aux dotfiles (identite comprise) : le role git ne
+# doit pas y ecrire en parallele, chezmoi refuserait ensuite d'ecraser le
+# fichier. Il ne sert qu'aux machines sans dotfiles, pour poser l'identite.
+base_roles_git: "{{ ['git'] if 'dotfiles' in base_skip else [] }}"
+
 base_roles: >-
   {{ (base_roles_by_profile[profile] | default([]))
      + (base_roles_by_os[os] | default([]))
+     + base_roles_git
      + base_roles_personal
      + (base_roles_by_context[context] | default([])) }}
 
