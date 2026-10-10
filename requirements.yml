@@ -5,4 +5,4 @@ collections:
   - name: ansible.posix
     version: ">=1.5.0"
   - name: kubernetes.core
-    version: ">=3.0.0"
+    version: ">=6.5.0"     # compatibilite Helm v4 du module helm

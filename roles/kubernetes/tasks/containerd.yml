@@ -2,7 +2,7 @@
 - name: Download and install Containerd
   become: true
   ansible.builtin.unarchive:
-    src: https://github.com/containerd/containerd/releases/download/v2.0.0/containerd-2.0.0-linux-amd64.tar.gz
+    src: https://github.com/containerd/containerd/releases/download/v{{ containerd_version }}/containerd-{{ containerd_version }}-linux-amd64.tar.gz
     dest: /usr/local
     remote_src: yes
   tags: containerd
@@ -34,7 +34,7 @@
 - name: Download service configuration file
   become: true
   ansible.builtin.get_url:
-    url: https://raw.githubusercontent.com/containerd/containerd/main/containerd.service
+    url: https://raw.githubusercontent.com/containerd/containerd/v{{ containerd_version }}/containerd.service
     dest: /etc/systemd/system/containerd.service
   tags: containerd
 

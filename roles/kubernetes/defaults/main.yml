@@ -1,0 +1,16 @@
+---
+# Branche mineure de Kubernetes : pkgs.k8s.io publie un depot par mineure.
+# Changer cette valeur ne met pas a jour un cluster existant (les paquets
+# sont seulement installes s'ils manquent) : kubeadm upgrade se fait une
+# mineure a la fois.
+kubernetes_version: "1.37"
+
+# Runtime et reseau des conteneurs, installes depuis les releases GitHub.
+containerd_version: "2.4.1"
+runc_version: "1.5.2"
+cni_plugins_version: "1.9.1"
+
+# Controleur ingress Traefik, deploye par son chart Helm. La version du chart
+# fixe celle de Traefik (chart 41.7.1 -> Traefik 3.7.14).
+helm_version: "4.3.0"
+traefik_chart_version: "41.7.1"

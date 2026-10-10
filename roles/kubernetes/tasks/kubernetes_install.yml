@@ -1,28 +1,38 @@
 ---
-- name: Make sure apt-transport-https, ca-certificates, curl and gpg are installed
+# python3-debian est requis par le module deb822_repository.
+- name: Make sure ca-certificates, curl and python3-debian are installed
   become: true
   ansible.builtin.apt:
     pkg:
-    - apt-transport-https
     - ca-certificates
     - curl
-    - gpg
+    - python3-debian
     update_cache: yes
   tags: install
 
-- name: Adding official Kubernetes GPG apt Key
+# apt-key n'existe plus depuis Ubuntu 26.04 : le depot est declare au format
+# deb822, avec sa cle en Signed-By. L'ancien kubernetes.list et son keyring
+# doivent disparaitre : deux sources aux Signed-By differents feraient
+# echouer apt.
+- name: Remove the legacy Kubernetes repository and key
   become: true
-  ansible.builtin.apt_key:
-    url: https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key
-    keyring: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-    state: present
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/apt/sources.list.d/kubernetes.list
+    - /etc/apt/keyrings/kubernetes-apt-keyring.gpg
   tags: install
 
+# Depot "plat" : la suite est `/`, sans composant.
 - name: Adding Kubernetes repository
   become: true
-  ansible.builtin.apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /"
-    filename: kubernetes.list
+  ansible.builtin.deb822_repository:
+    name: kubernetes
+    types: deb
+    uris: https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_version }}/deb/
+    suites: /
+    signed_by: https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_version }}/deb/Release.key
     state: present
   tags: install
 

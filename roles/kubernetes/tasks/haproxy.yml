@@ -1,27 +1,16 @@
 ---
-- name: Make sure software-properties-common is installed
-  become: true
-  ansible.builtin.apt:
-    name: software-properties-common
-    update_cache: yes
-    install_recommends: false
-  tags: haproxy
-
-- name: Add HAProxy PPA repository
-  become: true
-  ansible.builtin.apt_repository:
-    repo: ppa:vbernat/haproxy-3.0
-  tags: haproxy
-
+# HAProxy vient des depots Ubuntu : le PPA vbernat ne publie pas pour toutes
+# les versions (rien pour la 26.04).
 - name: Install HAProxy
   become: true
   ansible.builtin.apt:
-    name: haproxy=3.0.\*
+    name: haproxy
+    state: present
     update_cache: yes
   tags: haproxy
 
-- name: Get Nginx ingress controller NodePort
-  ansible.builtin.shell: kubectl get svc -n ingress-nginx ingress-nginx-controller -o=jsonpath='{.spec.ports[?(@.port==80)].nodePort}'
+- name: Get Traefik ingress controller NodePort
+  ansible.builtin.shell: kubectl get svc -n traefik traefik -o=jsonpath='{.spec.ports[?(@.port==80)].nodePort}'
   register: result
   tags: haproxy
 
