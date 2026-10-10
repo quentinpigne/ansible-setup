@@ -19,7 +19,11 @@ core_tools_package_names:
   tree: tree
 
 # Depots necessaires avant installation.
-# Le PPA neovim vient de l'ancien role nvim : la version des depots Ubuntu
-# est trop ancienne.
-core_tools_repositories:
-  - ppa:neovim-ppa/unstable
+# Le PPA neovim compense un neovim trop ancien dans les depots Ubuntu. A
+# partir de la 26.04, la version des depots suffit, et le PPA echoue sur
+# "Unable to get required signing key" : il n'est plus ajoute.
+core_tools_repositories: >-
+  {{ ['ppa:neovim-ppa/unstable']
+     if ansible_facts.distribution == 'Ubuntu'
+        and ansible_facts.distribution_version is version('26.04', '<')
+     else [] }}
