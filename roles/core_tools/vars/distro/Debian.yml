@@ -15,6 +15,7 @@ core_tools_package_names:
   jq: jq
   mc: mc
   neovim: neovim
+  rbw: rbw
   ripgrep: ripgrep
   tree: tree
 

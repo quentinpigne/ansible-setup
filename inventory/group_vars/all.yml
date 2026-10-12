@@ -43,6 +43,7 @@ core_tools:
   - jq
   - mc
   - neovim
+  - rbw
   - ripgrep
   - tree
 

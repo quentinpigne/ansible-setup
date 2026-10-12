@@ -11,5 +11,6 @@ core_tools_package_names:
   jq: jq
   mc: midnight-commander
   neovim: neovim
+  rbw: rbw
   ripgrep: ripgrep
   tree: tree
