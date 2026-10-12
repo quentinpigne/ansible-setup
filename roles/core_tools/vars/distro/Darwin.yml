@@ -1,5 +1,6 @@
 ---
 core_tools_package_names:
+  age: age
   ansible: ansible
   bat: bat
   eza: eza

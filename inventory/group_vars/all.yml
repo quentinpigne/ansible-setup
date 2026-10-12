@@ -32,6 +32,7 @@ distro_supported:
 # (homebrew.formulae, apt.packages) ou dans un extra.
 ##
 core_tools:
+  - age
   - ansible
   - bat
   - eza

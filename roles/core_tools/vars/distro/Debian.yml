@@ -4,6 +4,7 @@
 #   fd-find  -> /usr/bin/fdfind
 # Les alias correspondants doivent exister dans la branche Linux des dotfiles.
 core_tools_package_names:
+  age: age
   ansible: ansible
   bat: bat
   eza: eza
