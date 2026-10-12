@@ -155,7 +155,9 @@ extras_available:
   - rust
   - go
   # Outils
+  - claude_code
   - docker
   - gitlab_runner
   - kubernetes
+  - opencode
   - samba

@@ -1,0 +1,10 @@
+---
+# Installeur natif officiel, identique sur macOS et Linux : binaire dans
+# ~/.local/bin, mis a jour automatiquement par Claude Code lui-meme.
+# Le cask Homebrew existe mais ne se met pas a jour seul -> ecarte.
+# Pas de become : l'installeur refuse sudo et s'installe dans le home.
+- name: Install Claude Code
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://claude.ai/install.sh | bash
+    creates: "{{ user_home }}/.local/bin/claude"
+  tags: [claude_code]

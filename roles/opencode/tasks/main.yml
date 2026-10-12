@@ -1,0 +1,11 @@
+---
+# Installeur officiel, identique sur macOS et Linux : binaire dans
+# ~/.opencode/bin, mis a jour par `opencode upgrade`.
+# Pas de become : l'installation se fait dans le home de l'utilisateur.
+- name: Install opencode
+  ansible.builtin.shell:
+    # --no-modify-path : sans lui, l'installeur ajoute son PATH au .zshrc,
+    # qui est gere par chezmoi.
+    cmd: curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path
+    creates: "{{ user_home }}/.opencode/bin/opencode"
+  tags: [opencode]

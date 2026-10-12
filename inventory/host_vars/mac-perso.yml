@@ -6,7 +6,9 @@
 # Catalogue complet : `extras_available` dans group_vars/all.yml
 ##
 extras:
+  - claude_code
   - docker
+  - opencode
 
 ##
 # Langues activees dans les dotfiles (chezmoi).
