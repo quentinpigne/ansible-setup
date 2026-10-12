@@ -2,6 +2,16 @@
 # Aucun paquet Nerd Font dans les depots Debian/Ubuntu : `fonts-firacode`
 # existe mais ne fournit que la police d'origine, sans les glyphes patches.
 # -> fallback sur les archives officielles du projet nerd-fonts.
+
+# Fournit fc-cache, appele par le handler. Absent des installations minimales.
+- name: Install fontconfig
+  become: true
+  ansible.builtin.apt:
+    name: fontconfig
+    state: present
+    cache_valid_time: 3600
+  tags: [fonts]
+
 - name: Create the user fonts directory
   ansible.builtin.file:
     path: "{{ user_home }}/.local/share/fonts/{{ item }}"

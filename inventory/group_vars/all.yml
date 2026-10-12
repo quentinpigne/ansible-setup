@@ -101,7 +101,11 @@ base_roles_by_os:
 base_roles_personal:
   - zsh              # avant dotfiles : oh-my-zsh ecrit un .zshrc que chezmoi remplace
   - dotfiles
-  - fonts
+
+# Les polices ne servent qu'ou un terminal les affiche : sur un serveur ou dans
+# WSL, c'est le poste client (ou Windows) qui rend le texte. Placees apres les
+# roles d'OS, Homebrew devant etre installe avant le cask.
+base_roles_display: "{{ ['fonts'] if profile == 'desktop' else [] }}"
 
 base_roles_by_context:
   perso:
@@ -118,6 +122,7 @@ base_roles: >-
      + (base_roles_by_os[os] | default([]))
      + base_roles_git
      + base_roles_personal
+     + base_roles_display
      + (base_roles_by_context[context] | default([])) }}
 
 ##
@@ -126,7 +131,7 @@ base_roles: >-
 # Retire des roles de la base pour CETTE machine. Declaratif et persistant,
 # contrairement a `--skip-tags` qu'il faudrait repasser a chaque execution.
 #
-#   base_skip: [dotfiles, git, fonts]   une VM qu'on equipe sans s'y installer
+#   base_skip: [dotfiles, git]          une VM qu'on equipe sans s'y installer
 #   base_skip: [macos_settings]         un Mac dont on ne veut pas toucher l'UI
 #
 # `reject` preserve l'ordre de la liste, contrairement au filtre `difference`.

@@ -30,7 +30,8 @@ base_roles: >-
   {{ (base_roles_by_profile[profile] | default([]))     # hostname, ssh
      + (base_roles_by_os[os] | default([]))             # paquets, core_tools
      + base_roles_git                                   # git, seulement sans dotfiles
-     + base_roles_personal                              # zsh, dotfiles, fonts
+     + base_roles_personal                              # zsh, dotfiles
+     + base_roles_display                               # fonts, desktop seulement
      + (base_roles_by_context[context] | default([])) }}   # DNS, proxy
 
 # roles/base/tasks/main.yml
@@ -47,8 +48,8 @@ Ce qui donne, machine par machine :
 ```
 mac-perso    hostname preflight homebrew appstore core_tools iterm2
              macos_settings zsh dotfiles fonts dns
-ubuntu01     hostname ssh apt_base core_tools zsh dotfiles fonts dns
-wsl-kaizen   apt_base core_tools zsh dotfiles fonts
+ubuntu01     hostname ssh apt_base core_tools zsh dotfiles dns
+wsl-kaizen   apt_base core_tools zsh dotfiles
 ```
 
 L'ordre compte : le profil pose l'identite, l'OS installe, le contexte applique
@@ -181,7 +182,7 @@ a partir des trois axes puis filtree. Elle s'inspecte :
 
 ```sh
 ansible ubuntu01 -m debug -a var=base_roles
-# hostname, ssh, apt_base, core_tools, zsh, dotfiles, fonts, dns
+# hostname, ssh, apt_base, core_tools, zsh, dotfiles, dns
 ```
 
 (`ansible-inventory --host` ne convient pas ici : il affiche le template, pas
@@ -201,7 +202,7 @@ qu'il faudrait repasser a chaque execution :
 
 ```yaml
 # une VM de travail : les outils, pas l'identite
-base_skip: [git, zsh, dotfiles, fonts]
+base_skip: [git, zsh, dotfiles]
 
 # un Mac dont Ansible ne doit pas toucher l'interface
 base_skip: [macos_settings, iterm2]
