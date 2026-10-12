@@ -1,7 +1,0 @@
----
-- name: WSL shutdown required
-  ansible.builtin.debug:
-    msg: >-
-      /etc/wsl.conf a ete modifie. Les changements ne prendront effet qu'apres
-      un `wsl --shutdown` lance depuis Windows (PowerShell ou cmd), puis
-      reouverture de la distro.

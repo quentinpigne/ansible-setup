@@ -11,7 +11,7 @@ materialises par des groupes d'inventaire :
 | Axe          | Valeurs                     | Determine                          |
 | ------------ | --------------------------- | ---------------------------------- |
 | **contexte** | `perso` / `pro`             | la politique (DNS, proxy)          |
-| **profil**   | `desktop` / `server` / `wsl`| l'usage (hostname, sshd, wsl.conf) |
+| **profil**   | `desktop` / `server` / `wsl`| l'usage (hostname, sshd)           |
 | **OS**       | `mac` / `linux`             | l'installation (brew, apt)         |
 
 | Machine       | contexte | profil    | OS      |
@@ -27,7 +27,7 @@ sous forme de listes, et le role `base` les enchaine :
 ```yaml
 # group_vars/all.yml
 base_roles: >-
-  {{ (base_roles_by_profile[profile] | default([]))     # hostname, ssh, wsl.conf
+  {{ (base_roles_by_profile[profile] | default([]))     # hostname, ssh
      + (base_roles_by_os[os] | default([]))             # paquets, core_tools
      + base_roles_git                                   # git, seulement sans dotfiles
      + base_roles_personal                              # zsh, dotfiles, fonts
@@ -48,7 +48,7 @@ Ce qui donne, machine par machine :
 mac-perso    hostname preflight homebrew appstore core_tools iterm2
              macos_settings zsh dotfiles fonts dns
 ubuntu01     hostname ssh apt_base core_tools zsh dotfiles fonts dns
-wsl-kaizen   wsl_conf apt_base core_tools zsh dotfiles fonts
+wsl-kaizen   apt_base core_tools zsh dotfiles fonts
 ```
 
 L'ordre compte : le profil pose l'identite, l'OS installe, le contexte applique
@@ -388,7 +388,7 @@ Prealable sur macOS : autoriser `Full Disk Access` pour le terminal, dans
 ### WSL
 
 Le playbook se joue **depuis l'interieur de la distro**. Toute modification de
-`/etc/wsl.conf` (hostname, DNS) ne prend effet qu'apres un `wsl --shutdown`
+`/etc/wsl.conf` (faite a la main) ne prend effet qu'apres un `wsl --shutdown`
 lance depuis Windows.
 
 Ubuntu 26.04 remplace `sudo` par `sudo-rs`, avec lequel Ansible ne reconnait

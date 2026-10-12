@@ -8,9 +8,6 @@ profile: wsl
 # deja `[boot] systemd=true`. Les roles qui en dependent (docker) le verifient
 # via un assert plutot que de reecrire wsl.conf.
 #
-# Attention : toute modification de /etc/wsl.conf ne prend effet qu'apres un
-# `wsl --shutdown` lance depuis Windows.
+# /etc/wsl.conf n'est pas gere : le hostname est herite de Windows, et la
+# generation de /etc/resolv.conf reste celle par defaut de WSL.
 ##
-wsl:
-  # Pas de gestion du hostname : sur WSL il est herite de Windows.
-  generate_resolv_conf: true

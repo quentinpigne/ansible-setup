@@ -84,8 +84,7 @@ base_roles_by_profile:
   server:
     - hostname
     - ssh            # avant dotfiles : le depot dotfiles se clone en SSH
-  wsl:
-    - wsl_conf       # ni hostname (herite de Windows) ni ssh (pas de sshd)
+  wsl: []          # ni hostname (herite de Windows) ni ssh (pas de sshd)
 
 base_roles_by_os:
   mac:
