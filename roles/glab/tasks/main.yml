@@ -1,0 +1,13 @@
+---
+# CLI GitLab. L'authentification reste manuelle (`glab auth login`), le token
+# n'a pas a transiter par Ansible.
+- name: Install glab
+  ansible.builtin.include_tasks: "{{ lookup('ansible.builtin.first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_facts.distribution }}.yml"
+        - "{{ distro_family }}.yml"
+      paths:
+        - distro
+  tags: [glab]

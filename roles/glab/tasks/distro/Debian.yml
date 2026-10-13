@@ -1,0 +1,22 @@
+---
+# `glab` existe dans apt mais reste tres en retard (1.36 en 24.04, 1.53 en
+# 26.04) -> paquet .deb officiel publie par GitLab a chaque release.
+- name: Check the installed glab version
+  ansible.builtin.command: glab --version
+  register: glab_installed
+  changed_when: false
+  check_mode: false
+  failed_when: false
+  tags: [glab]
+
+- name: Install glab from the official package
+  become: true
+  ansible.builtin.apt:
+    deb: >-
+      https://gitlab.com/gitlab-org/cli/-/releases/v{{ glab_version }}/downloads/glab_{{ glab_version }}_linux_{{ glab_arch[ansible_facts.architecture] }}.deb
+  vars:
+    glab_arch:
+      x86_64: amd64
+      aarch64: arm64
+  when: glab_version not in (glab_installed.stdout | default(''))
+  tags: [glab]

@@ -159,6 +159,7 @@ extras_available:
   - claude_code
   - docker
   - gitlab_runner
+  - glab          # CLI GitLab
   - kubernetes
   - opencode
   - samba

@@ -1,0 +1,6 @@
+---
+- name: Install glab with Homebrew
+  community.general.homebrew:
+    name: glab
+    state: present
+  tags: [glab]

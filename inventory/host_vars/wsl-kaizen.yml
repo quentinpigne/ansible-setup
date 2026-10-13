@@ -13,6 +13,7 @@ ansible_become_exe: >-
 extras:
   - claude_code
   - docker
+  - glab
   - nvm
   - opencode
   - rust

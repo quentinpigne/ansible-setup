@@ -259,6 +259,13 @@ dans l'UI GitLab (Settings > CI/CD > Runners > New runner) :
 sudo gitlab-runner register --url https://gitlab.com --token glrt-xxx
 ```
 
+### CLI GitLab
+
+L'extra `glab` installe la CLI GitLab : Homebrew sur macOS, paquet `.deb`
+officiel de la release GitLab sur Linux (les depots Ubuntu sont tres en
+retard). Version figee dans `roles/glab/defaults/main.yml`. L'authentification
+reste manuelle : `glab auth login`.
+
 ### Hostname
 
 Quatre comportements, selon le profil :
