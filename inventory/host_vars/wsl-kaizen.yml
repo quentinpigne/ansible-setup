@@ -4,7 +4,11 @@
 # Ubuntu 26.04 livre sudo-rs comme `sudo` par defaut. Ansible n'y reconnait
 # pas sa demande de mot de passe et echoue en timeout, meme avec le bon mot de
 # passe. Le sudo historique reste installe sous le nom sudo.ws.
-ansible_become_exe: sudo.ws
+# Ubuntu 24.04, egalement supportee, n'a que le sudo historique, sans sudo.ws.
+ansible_become_exe: >-
+  {{ 'sudo.ws'
+     if ansible_facts.distribution_version | default('0') is version('25.10', '>=')
+     else 'sudo' }}
 
 extras:
   - claude_code

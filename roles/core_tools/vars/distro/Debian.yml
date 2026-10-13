@@ -46,3 +46,18 @@ core_tools_legacy_sources:
 # seulement installes s'ils manquent.
 core_tools_latest:
   - neovim
+
+# Outils absents des depots de certaines distributions, installes alors depuis
+# la release upstream (binaires dans /usr/local/bin). La disponibilite est
+# testee a l'execution (`apt-cache show`), pas deduite d'une version de distro.
+#
+# rbw n'est package qu'a partir d'Ubuntu 25.04 : absent d'Ubuntu 24.04 et de
+# Debian trixie. Upstream ne publie qu'une archive amd64. Le paquet APT tire
+# pinentry-curses, ajoute ici a la main.
+core_tools_rbw_version: "1.15.0"
+core_tools_from_release:
+  rbw:
+    url: "https://github.com/doy/rbw/releases/download/{{ core_tools_rbw_version }}/rbw_{{ core_tools_rbw_version }}_linux_amd64.tar.gz"
+    version: "{{ core_tools_rbw_version }}"
+    binaries: [rbw, rbw-agent]
+    dependencies: [pinentry-curses]

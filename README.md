@@ -395,8 +395,13 @@ lance depuis Windows.
 Ubuntu 26.04 remplace `sudo` par `sudo-rs`, avec lequel Ansible ne reconnait
 pas la demande de mot de passe : il echoue en *timeout waiting for privilege
 escalation prompt*, meme avec le bon mot de passe. `wsl-kaizen` force donc le
-sudo historique (`ansible_become_exe: sudo.ws`) ; a reprendre pour toute autre
-machine en 26.04.
+sudo historique (`ansible_become_exe: sudo.ws`) des Ubuntu 25.10, et garde `sudo`
+en 24.04, ou `sudo.ws` n'existe pas ; a reprendre pour toute autre machine en
+26.04.
+
+`rbw` n'est pas dans les depots d'Ubuntu 24.04 (ni de Debian trixie) :
+`core_tools` le detecte (`apt-cache show`) et installe alors les binaires de la
+release GitHub dans `/usr/local/bin`.
 
 # Based on
 

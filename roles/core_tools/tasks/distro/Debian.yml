@@ -52,10 +52,27 @@
   when: core_tools_repos is changed
   tags: [core, tools]
 
+- name: Check which core tools are missing from the APT repositories
+  ansible.builtin.command:
+    cmd: "apt-cache show {{ core_tools_package_names[item] }}"
+  loop: "{{ core_tools_from_release | default({}) | list | intersect(core_tools) }}"
+  register: core_tools_apt_show
+  changed_when: false
+  check_mode: false
+  failed_when: false
+  tags: [core, tools]
+
+- name: List the core tools to install from their upstream release
+  ansible.builtin.set_fact:
+    core_tools_release: >-
+      {{ core_tools_apt_show.results | rejectattr('rc', '==', 0)
+         | map(attribute='item') | list }}
+  tags: [core, tools]
+
 - name: Install the core tools with APT
   become: true
   ansible.builtin.apt:
-    name: "{{ core_tools | map('extract', core_tools_package_names) | list }}"
+    name: "{{ core_tools | difference(core_tools_release) | map('extract', core_tools_package_names) | list }}"
     state: present
     cache_valid_time: 3600
   tags: [core, tools]
@@ -68,4 +85,47 @@
     name: "{{ core_tools_latest | intersect(core_tools) | map('extract', core_tools_package_names) | list }}"
     state: latest
   when: core_tools_latest | default([]) | intersect(core_tools) | length > 0
+  tags: [core, tools]
+
+- name: Ensure the upstream releases match this architecture
+  ansible.builtin.assert:
+    that: ansible_facts.architecture == 'x86_64'
+    fail_msg: >-
+      {{ core_tools_release | join(', ') }} : absent des depots APT, et la
+      release upstream n'existe qu'en amd64 ({{ ansible_facts.architecture }}
+      ici).
+  when: core_tools_release | length > 0
+  tags: [core, tools]
+
+- name: Install the dependencies of the upstream releases
+  become: true
+  ansible.builtin.apt:
+    name: "{{ core_tools_release | map('extract', core_tools_from_release) | map(attribute='dependencies') | flatten }}"
+    state: present
+  when: core_tools_release | length > 0
+  tags: [core, tools]
+
+- name: Check the installed version of the upstream releases
+  ansible.builtin.command: "/usr/local/bin/{{ item }} --version"
+  loop: "{{ core_tools_release }}"
+  register: core_tools_release_installed
+  changed_when: false
+  check_mode: false
+  failed_when: false
+  tags: [core, tools]
+
+- name: Install the core tools from their upstream release
+  become: true
+  ansible.builtin.unarchive:
+    src: "{{ core_tools_from_release[item.item].url }}"
+    dest: /usr/local/bin
+    remote_src: true
+    include: "{{ core_tools_from_release[item.item].binaries }}"
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ core_tools_release_installed.results }}"
+  loop_control:
+    label: "{{ item.item }} {{ core_tools_from_release[item.item].version }}"
+  when: core_tools_from_release[item.item].version not in (item.stdout | default(''))
   tags: [core, tools]
