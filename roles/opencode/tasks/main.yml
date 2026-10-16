@@ -1,11 +1,25 @@
 ---
-# Installeur officiel, identique sur macOS et Linux : binaire dans
+# Installeur officiel OpenCode 2, identique sur macOS et Linux : binaire dans
 # ~/.opencode/bin, mis a jour par `opencode upgrade`.
+# https://opencode.ai/install n'installe plus que OpenCode 1 ; la v2 a son
+# propre installeur sous /v2/.
 # Pas de become : l'installation se fait dans le home de l'utilisateur.
+- name: Get installed opencode version
+  ansible.builtin.command:
+    cmd: "{{ user_home }}/.opencode/bin/opencode --version"
+  register: opencode_version
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  tags: [opencode]
+
+# Installe si absent, ou remplace une installation OpenCode 1 (meme chemin).
 - name: Install opencode
   ansible.builtin.shell:
     # --no-modify-path : sans lui, l'installeur ajoute son PATH au .zshrc,
     # qui est gere par chezmoi.
-    cmd: curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path
-    creates: "{{ user_home }}/.opencode/bin/opencode"
+    cmd: curl -fsSL https://opencode.ai/v2/install | bash -s -- --no-modify-path
+  when: >-
+    opencode_version.rc != 0
+    or (opencode_version.stdout | regex_search('[0-9]+\.[0-9.]+') | default('0', true)) is version('2', '<')
   tags: [opencode]
